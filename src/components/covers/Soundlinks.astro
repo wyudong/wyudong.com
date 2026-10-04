@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import listen from '../../assets/projects/soundlinks/soundlinks-listen.png';
+---
+
+<div class="project-cover cover-sound">
+  <div class="stage">
+    <Image
+      class="shot-main"
+      src={listen}
+      widths={[240, 400, 480, 800]}
+      sizes="(min-width: 1440px) 399px, (min-width: 1200px) 323px, (min-width: 810px) 228px, calc(100vw - 32px)"
+      loading="lazy"
+      alt="Soundlinks 听一听原始产品截图"
+    />
+  </div>
+</div>
+
+<style>
+  .project-cover {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .stage {
+    position: absolute;
+    inset: 0;
+  }
+  /* 图片不参与撑高：卡片高度由拼贴决定（桌面撑满窄列，手机 1/1.4） */
+  .stage :global(.shot-main) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+</style>

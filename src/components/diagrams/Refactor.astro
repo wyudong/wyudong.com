@@ -1,0 +1,176 @@
+---
+// FydeOS 后端重构示意：账号、同步两个 Node.js 服务用 Go 重写，加上企业管理后端，经 APISIX 网关和 gRPC 统一接口。
+const BEFORE = [
+  { name: '账号服务', tech: 'Node.js' },
+  { name: '同步服务', tech: 'Node.js' },
+  { name: '企业管理后端', tech: 'Go' },
+];
+const AFTER = [
+  { name: '账号服务', tech: 'Go 重写' },
+  { name: '同步服务', tech: 'Go 重写' },
+  { name: '企业管理后端', tech: 'Go' },
+];
+const LABEL =
+  '重构前：账号服务和同步服务是两个独立的 Node.js 服务。' +
+  '重构后：账号服务和同步服务用 Go 重写，三个服务统一用 gRPC 定义接口，由 APISIX 网关统一对外。';
+---
+
+<div class="refactor-wrap">
+  <div class="refactor" role="img" aria-label={LABEL}>
+    <div class="side">
+      <span class="side-label">重构前 · 各自对外的独立服务</span>
+      <div class="services">
+        {BEFORE.map((svc) => (
+          <div class="svc">
+            <span class="svc-name">{svc.name}</span>
+            <span class="svc-tech">{svc.tech}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <span class="arrow" aria-hidden="true"></span>
+    <div class="side">
+      <span class="side-label">重构后 · 网关统一入口</span>
+      <div class="one">
+        <span class="gateway">Apache APISIX 网关</span>
+        <span class="link">gRPC</span>
+        <div class="modules">
+          {AFTER.map((svc) => (
+            <span class="module">
+              <span class="module-name">{svc.name}</span>
+              {svc.tech && <span class="module-tech">{svc.tech}</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .refactor-wrap {
+    container-type: inline-size;
+  }
+  .refactor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
+    gap: 16px;
+    padding: 28px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+  .side-label {
+    font-size: 13px;
+    color: var(--color-muted);
+  }
+  .services {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+  .svc {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px dashed #c4c6bd;
+    border-radius: 10px;
+  }
+  .svc-name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .svc-tech {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+  .arrow {
+    align-self: center;
+    justify-self: center;
+    font-size: 20px;
+    color: var(--color-muted);
+  }
+  .arrow::before {
+    content: '→';
+  }
+  .one {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    gap: 8px;
+    padding: 20px;
+    background: var(--color-yellow);
+    border: 1px solid #e3c53c;
+    border-radius: 10px;
+  }
+  .gateway {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--color-ink);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+  /* 网关和服务之间的连线，标上 gRPC */
+  .link {
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+    color: #4d4300;
+  }
+  .link::before,
+  .link::after {
+    content: '';
+    width: 1px;
+    height: 10px;
+    background: #4d4300;
+  }
+  .modules {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .module {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #fffbe5;
+  }
+  .module-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .module-tech {
+    font-size: 12px;
+    color: #4d4300;
+  }
+
+  @container (width < 640px) {
+    .refactor {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 20px 16px;
+    }
+    .arrow::before {
+      content: '↓';
+    }
+  }
+</style>

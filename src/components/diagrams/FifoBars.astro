@@ -1,0 +1,159 @@
+---
+// 先进先出匹配示意。金额和日期是虚构的例子：上面一条是按时间排列的入账，
+// 下面一条是支出，每笔支出按颜色标出它消耗了哪几笔入账。
+const INCOMING = [
+  { key: 'a', date: '3 月 1 日', amount: 300 },
+  { key: 'b', date: '3 月 2 日', amount: 500 },
+  { key: 'c', date: '3 月 4 日', amount: 200 },
+];
+const OUTGOING = [
+  {
+    date: '3 月 3 日',
+    amount: 400,
+    parts: [
+      { key: 'a', amount: 300 },
+      { key: 'b', amount: 100 },
+    ],
+  },
+  {
+    date: '3 月 5 日',
+    amount: 600,
+    parts: [
+      { key: 'b', amount: 400 },
+      { key: 'c', amount: 200 },
+    ],
+  },
+];
+const LABEL =
+  '先进先出匹配示意。入账：3 月 1 日 300，3 月 2 日 500，3 月 4 日 200。' +
+  '支出：3 月 3 日 400，来自 3 月 1 日的 300 和 3 月 2 日的 100；' +
+  '3 月 5 日 600，来自 3 月 2 日剩下的 400 和 3 月 4 日的 200。';
+---
+
+<div class="fifo" role="img" aria-label={LABEL}>
+  <div class="row">
+    <span class="row-label">入账</span>
+    <div class="bar">
+      {INCOMING.map((item) => (
+        <div class="group" style={`flex: ${item.amount} 1 0`}>
+          <div class="segs">
+            <div class:list={['seg', `seg-${item.key}`]}>{item.amount}</div>
+          </div>
+          <span class="group-label">{item.date}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="row">
+    <span class="row-label">支出</span>
+    <div class="bar">
+      {OUTGOING.map((item) => (
+        <div class="group" style={`flex: ${item.amount} 1 0`}>
+          <div class="segs">
+            {item.parts.map((part) => (
+              <div class:list={['seg', `seg-${part.key}`]} style={`flex: ${part.amount} 1 0`}>
+                {part.amount}
+              </div>
+            ))}
+          </div>
+          <span class="group-label">
+            {item.date}支出 {item.amount}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+  <p class="legend">颜色表示入账和支出的 FIFO 对应关系。</p>
+</div>
+
+<style>
+  .fifo {
+    display: grid;
+    gap: 22px;
+    padding: 28px 28px 24px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+  }
+  .row-label {
+    font-size: 13px;
+    line-height: 44px;
+    color: var(--color-muted);
+  }
+  .bar {
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+  }
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .segs {
+    display: flex;
+    overflow: hidden;
+    border-radius: 9px;
+  }
+  .seg {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    height: 44px;
+    overflow: hidden;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--color-ink);
+  }
+  .seg + .seg {
+    border-left: 2px solid #fff;
+  }
+  .seg-a {
+    background: var(--color-yellow);
+  }
+  .seg-b {
+    background: #cfe2d4;
+  }
+  .seg-c {
+    background: #dad6f0;
+  }
+  .group-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+  .legend {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  @media (width < 810px) {
+    .fifo {
+      padding: 20px 16px 18px;
+    }
+    .row {
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 8px;
+    }
+    .seg {
+      font-size: 11px;
+    }
+    .group-label {
+      font-size: 11px;
+    }
+  }
+</style>

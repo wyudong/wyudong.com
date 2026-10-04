@@ -1,0 +1,53 @@
+---
+import '../styles/fonts.generated.css';
+import '../styles/global.css';
+import latinFont from '../assets/fonts/plus-jakarta-sans.woff2?url';
+import cjkFont from '../assets/fonts/noto-sans-sc.woff2?url';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogTitle?: string;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, ogTitle, ogType = 'website' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 全站字体只有这两个文件，包含所有页面的用字，一打开就下载，见 scripts/build-fonts.mjs -->
+    <link rel="preload" href={latinFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={cjkFont} as="font" type="font/woff2" crossorigin />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#fafaf8" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content={ogTitle ?? title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="zh_CN" />
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      跳到主要内容
+    </a>
+    <div class="shell">
+      <SiteHeader />
+    </div>
+    <main id="main" class="shell">
+      <slot />
+    </main>
+    <div class="shell">
+      <Footer />
+    </div>
+  </body>
+</html>

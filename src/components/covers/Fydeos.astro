@@ -1,0 +1,317 @@
+---
+import { Image } from 'astro:assets';
+import BrowserMock from '../BrowserMock.astro';
+import fydropShot from '../../assets/projects/fydeos/fydrop.png';
+import installerUrl from '../../assets/projects/fydeos/installer.svg?url';
+import opengappsUrl from '../../assets/projects/fydeos/opengapps.svg?url';
+import rdpUrl from '../../assets/projects/fydeos/rdp.svg?url';
+---
+
+<div class="project-cover cover-fy">
+  <div class="stage">
+    <div class="fy-window fy-store">
+      <BrowserMock title="App Store">
+        <div class="app-stack">
+          <div class="app-cover">
+            <img src={installerUrl} alt="" loading="lazy" decoding="async" />
+            <span class="app-name">安装程序</span>
+          </div>
+          <div class="app-cover">
+            <img src={opengappsUrl} alt="" loading="lazy" decoding="async" />
+            <span class="app-name">配置 Open GApps</span>
+          </div>
+          <div class="app-cover app-cover-wide">
+            <img src={rdpUrl} alt="" loading="lazy" decoding="async" />
+            <span class="app-name">远程桌面</span>
+          </div>
+        </div>
+      </BrowserMock>
+    </div>
+    <div class="fy-window fy-community">
+      <BrowserMock title="Community">
+        <div class="community-art" role="img" aria-label="社区概念示意：新闻公告、求助答疑、分享发现三个版块">
+          <div class="forum-bar">
+            <span class="forum-name">FydeOS 社区</span>
+            <span class="forum-nav">最新 · 热门</span>
+          </div>
+          <div class="boards">
+            <div class="board">
+              <i class="board-icon board-icon-1"></i>
+              <span class="board-text">
+                <strong>新闻公告</strong>
+                <em>公告与最新动态</em>
+              </span>
+              <span class="board-go">›</span>
+            </div>
+            <div class="board">
+              <i class="board-icon board-icon-2"></i>
+              <span class="board-text">
+                <strong>求助答疑</strong>
+                <em>安装、驱动与兼容性</em>
+              </span>
+              <span class="board-go">›</span>
+            </div>
+            <div class="board">
+              <i class="board-icon board-icon-3"></i>
+              <span class="board-text">
+                <strong>分享发现</strong>
+                <em>配置、玩法与折腾</em>
+              </span>
+              <span class="board-go">›</span>
+            </div>
+          </div>
+        </div>
+      </BrowserMock>
+    </div>
+    <div class="fy-window fy-drop">
+      <BrowserMock title="FyDrop">
+        <div class="fydrop-shot">
+          <Image
+            src={fydropShot}
+            widths={[280, 560, 800]}
+            sizes="(min-width: 810px) 280px, 34vw"
+            loading="lazy"
+            alt="FyDrop 跨设备文件传输真实界面"
+          />
+        </div>
+      </BrowserMock>
+    </div>
+  </div>
+</div>
+
+<style>
+  .project-cover {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .cover-fy {
+    isolation: isolate;
+    background:
+      radial-gradient(ellipse at 13% 25%, #afd6ed 0, transparent 60%),
+      radial-gradient(ellipse at 91% 70%, #b8ade4 0, transparent 65%),
+      radial-gradient(ellipse at 55% 110%, #e4c9ec 0, transparent 65%), #edf2fa;
+    --mock-border: #ffffffaa;
+    --mock-shadow: 0 20px 32px -12px #414a7150;
+    --mock-bar-padding: 0 8px;
+    --mock-bar-gap: 4px;
+  }
+  .cover-fy::before {
+    content: '';
+    position: absolute;
+    width: 110%;
+    height: 150%;
+    border: 1px solid #ffffff80;
+    border-radius: 50%;
+    left: -24%;
+    top: -72%;
+    transform: rotate(-28deg);
+    pointer-events: none;
+  }
+  .stage {
+    position: absolute;
+    inset: 0;
+  }
+  .fy-window {
+    position: absolute;
+    z-index: 1;
+    width: 35%;
+    height: 68%;
+    top: 16%;
+  }
+  .fy-community {
+    left: 6%;
+    transform: rotate(-5deg);
+  }
+  .fy-drop {
+    right: 6%;
+    transform: rotate(5deg);
+  }
+  .fy-store {
+    z-index: 3;
+    width: 35%;
+    height: 74.8%;
+    left: 32.5%;
+    top: 12.6%;
+    --mock-shadow: 0 24px 40px -12px #38436070;
+  }
+
+  .app-stack {
+    container-type: size;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 7px;
+    background: #f7f8fa;
+  }
+  .app-cover {
+    position: relative;
+    align-self: center;
+    flex: none;
+    width: min(100%, calc((100cqh - 10px) / 3 * 2.08));
+    aspect-ratio: 1.95;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 5px 10px #36465315;
+  }
+  .app-cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: bottom center;
+  }
+  .app-cover-wide {
+    aspect-ratio: 742 / 279;
+  }
+  /* 卡片标题商店里是印在图上的，这里用真文字，尺寸跟着窗口缩放 */
+  .app-name {
+    position: absolute;
+    left: 6%;
+    top: 7%;
+    font-size: clamp(6px, 4cqi, 9px);
+    font-weight: 600;
+    color: #1f2328;
+    white-space: nowrap;
+  }
+
+  .community-art {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+    padding: 14px 10px 14px 15px;
+    background: linear-gradient(145deg, #f2f0fc, #e8eafa);
+  }
+  /* 论坛的样子：顶部站名 + 导航，下面是版块列表 */
+  .forum-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    padding-bottom: 7px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #dfe2f0;
+  }
+  .forum-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3d4662;
+  }
+  .forum-nav {
+    font-size: 9px;
+    color: #5a607f;
+    white-space: nowrap;
+  }
+  .boards {
+    display: contents;
+  }
+  .board {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 8px;
+    border: 1px solid #e0e3ed;
+    border-radius: 8px;
+    background: #ffffffc9;
+    box-shadow: 0 5px 12px #4c5b7c0b;
+  }
+  .board-icon {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+  }
+  .board-icon-1 {
+    background: #c7d2f6;
+  }
+  .board-icon-2 {
+    background: #d8ccf2;
+  }
+  .board-icon-3 {
+    background: #c9e0f2;
+  }
+  .board-text {
+    min-width: 0;
+  }
+  .board-text strong {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #424b68;
+  }
+  .board-text em {
+    display: block;
+    font-style: normal;
+    font-size: 9px;
+    color: #5a607f;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .board-go {
+    margin-left: auto;
+    font-size: 11px;
+    color: #5a607f;
+  }
+
+  .fydrop-shot {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: #fafafa;
+  }
+  .fydrop-shot :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* 714 版心和手机上封面变小，窗口里的字跟着缩（样稿手机端的数值） */
+  /* 窗口变小之后，收起版块说明，只留标题 */
+  @media (width < 1200px) {
+    .community-art {
+      padding: 8px 6px 8px 9px;
+      gap: 6px;
+    }
+    .forum-bar {
+      padding-bottom: 5px;
+    }
+    .forum-name {
+      font-size: 10px;
+    }
+    .forum-nav,
+    .board-text em {
+      display: none;
+    }
+    .board {
+      padding: 6px 7px;
+      gap: 6px;
+    }
+    .board-icon {
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+    }
+    .board-text strong {
+      font-size: 10px;
+    }
+    .board-go {
+      font-size: 10px;
+    }
+  }
+
+  /* 窗口太小时卡片标题会糊成一团，收起 */
+  @media (width < 1200px) {
+    .app-name {
+      display: none;
+    }
+  }
+</style>

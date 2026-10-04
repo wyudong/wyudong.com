@@ -1,0 +1,213 @@
+---
+import Bolt from '../../assets/projects/merryking/bolt.svg';
+import WorldWww from '../../assets/projects/merryking/world-www.svg';
+import Lark from '../../assets/projects/merryking/new-lark.svg';
+import Alibaba from '../../assets/projects/merryking/alibabadotcom.svg';
+import GoogleAds from '../../assets/projects/merryking/googleads.svg';
+---
+
+<div class="project-cover cover-mk" data-hub-flow>
+  <div class="stage">
+    <div class="hub-map" role="img" aria-label="自动化工具位于中心，连接电商独立站、Google Ads、飞书机器人和阿里国际站">
+      <svg class="hub-lines" viewBox="0 0 300 280" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M150 140 55 45M150 140 245 45M150 140 55 235M150 140 245 235"></path>
+      </svg>
+      <svg class="hub-signals" viewBox="0 0 300 280" preserveAspectRatio="none" aria-hidden="true">
+        <circle class="ring" data-signal="pulse" r="15"></circle>
+        <g data-signal="in-1">
+          <circle class="dot" r="3.5"></circle>
+          <circle class="halo" r="8" fill-opacity="0.28"></circle>
+        </g>
+        <g data-signal="in-2">
+          <circle class="dot" r="2.5"></circle>
+          <circle class="halo" r="6" fill-opacity="0.24"></circle>
+        </g>
+        <g data-signal="out-feishu">
+          <circle class="dot" r="3.5"></circle>
+          <circle class="halo" r="8" fill-opacity="0.28"></circle>
+        </g>
+        <g data-signal="out-ads">
+          <circle class="dot" r="3.5"></circle>
+          <circle class="halo" r="8" fill-opacity="0.28"></circle>
+        </g>
+        <g data-signal="out-alibaba">
+          <circle class="dot" r="3.5"></circle>
+          <circle class="halo" r="8" fill-opacity="0.28"></circle>
+        </g>
+      </svg>
+      <div class="hub-node hub-center">
+        <Bolt aria-hidden="true" />
+        <span>自动化工具</span>
+      </div>
+      <div class="hub-node hub-web">
+        <WorldWww aria-hidden="true" />
+        <span>电商独立站</span>
+      </div>
+      <div class="hub-node hub-ads">
+        <GoogleAds aria-hidden="true" />
+        <span>Google Ads</span>
+      </div>
+      <div class="hub-node hub-feishu">
+        <Lark aria-hidden="true" />
+        <span>飞书机器人</span>
+      </div>
+      <div class="hub-node hub-alibaba">
+        <Alibaba aria-hidden="true" />
+        <span>阿里国际站</span>
+      </div>
+    </div>
+  </div>
+  <button class="cover-motion" type="button" aria-pressed="false" aria-label="暂停项目动画" hidden>
+    <svg class="pause-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M4 2h3v12H4zm5 0h3v12H9z"></path>
+    </svg>
+    <svg class="play-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M4 2l10 6-10 6z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  import { initHubFlow } from '../../scripts/hub-flow';
+
+  document.querySelectorAll<HTMLElement>('[data-hub-flow]').forEach(initHubFlow);
+</script>
+
+<style>
+  .project-cover {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .cover-mk {
+    background:
+      radial-gradient(ellipse at 50% 48%, #fff4c9 0, transparent 60%),
+      radial-gradient(#b9a67745 0.7px, transparent 0.7px), #f4f0e5;
+    background-size:
+      auto,
+      16px 16px,
+      auto;
+  }
+  .stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hub-map {
+    position: relative;
+    width: 92%;
+    height: 85%;
+    container-type: inline-size;
+  }
+  .hub-lines,
+  .hub-signals {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .hub-lines {
+    fill: none;
+    stroke: #bca97b;
+    stroke-width: 1.2;
+  }
+  .hub-signals {
+    pointer-events: none;
+  }
+  .hub-signals [data-signal] {
+    opacity: 0;
+  }
+  .dot {
+    fill: var(--color-ink);
+  }
+  .halo {
+    fill: var(--color-yellow);
+  }
+  .ring {
+    fill: none;
+    stroke: var(--color-yellow);
+    stroke-width: 2;
+  }
+  /*
+   * 节点：横向胶囊，图标在左、文字在右，尺寸随枢纽图宽度（cqi）缩放。
+   */
+  .hub-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(4px, 1.6cqi, 13px);
+    padding: clamp(4px, 1.5cqi, 12px) clamp(8px, 3cqi, 24px);
+    background: #fffefa;
+    border: 1px solid #e3dccb;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px #50452b12;
+    font-size: clamp(10px, 3.2cqi, 24px);
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .hub-node :global(svg) {
+    width: clamp(12px, 4.2cqi, 32px);
+    height: clamp(12px, 4.2cqi, 32px);
+    flex: none;
+  }
+  .hub-center {
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    padding: clamp(6px, 2.2cqi, 18px) clamp(10px, 3.8cqi, 30px);
+    background: var(--color-yellow);
+    border-color: #dfc43e;
+    box-shadow: 0 8px 22px #af873733;
+    font-weight: 600;
+  }
+  .hub-web {
+    left: 18.3%;
+    top: 12.5%;
+  }
+  .hub-ads {
+    left: 81.7%;
+    top: 12.5%;
+  }
+  .hub-feishu {
+    left: 18.3%;
+    top: 87.5%;
+  }
+  .hub-alibaba {
+    left: 81.7%;
+    top: 87.5%;
+  }
+  .cover-motion {
+    position: absolute;
+    /* 盖在首页卡片的整卡链接上面，保证能点 */
+    z-index: 6;
+    /* 底部两个节点贴近卡片下沿，右下角放不下，挪到两者之间 */
+    left: 50%;
+    bottom: 12px;
+    translate: -50% 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #cfc5ac;
+    border-radius: 50%;
+    background: #ffffffa6;
+    color: #685a38;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .cover-motion svg {
+    width: 11px;
+    height: 11px;
+  }
+  .cover-motion[aria-pressed='true'] .pause-icon,
+  .cover-motion[aria-pressed='false'] .play-icon {
+    display: none;
+  }
+  .cover-motion[hidden] {
+    display: none;
+  }
+</style>

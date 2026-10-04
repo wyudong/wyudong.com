@@ -1,0 +1,211 @@
+---
+import { getCollection } from 'astro:content';
+import Fydeos from './covers/Fydeos.astro';
+import Zhongdayuan from './covers/Zhongdayuan.astro';
+import Merryking from './covers/Merryking.astro';
+import Soundlinks from './covers/Soundlinks.astro';
+
+const projects = await getCollection('projects');
+// 整卡链接的名字：项目名 + 副标题
+const labelOf = (id: string) => {
+  const data = projects.find((p) => p.id === id)?.data;
+  return data ? `${data.title}：${data.subtitle}` : id;
+};
+---
+
+<section class="projects" id="projects" aria-labelledby="projects-title">
+  <div class="section-head">
+    <h2 id="projects-title">做过的项目</h2>
+  </div>
+  <div class="project-list">
+    <div class="col">
+      <article class="project-item item-fy">
+        <a class="card-link" href="/fydeos/" aria-label={labelOf('fydeos')}></a>
+        <div class="card">
+          <Fydeos />
+        </div>
+      </article>
+      <article class="project-item item-zdy">
+        <a class="card-link" href="/zhong-da-yuan/" aria-label={labelOf('zhong-da-yuan')}></a>
+        <div class="card">
+          <Zhongdayuan />
+        </div>
+      </article>
+    </div>
+    <div class="col">
+      <article class="project-item item-mk">
+        <a class="card-link" href="/merryking/" aria-label={labelOf('merryking')}></a>
+        <div class="card">
+          <Merryking />
+        </div>
+      </article>
+      <article class="project-item item-sound">
+        <a class="card-link" href="/soundlinks/" aria-label={labelOf('soundlinks')}></a>
+        <div class="card">
+          <Soundlinks />
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .projects {
+    border-top: 1px solid var(--color-line);
+    padding: 28px 0 65px;
+  }
+  .section-head {
+    margin-bottom: 30px;
+  }
+  .section-head h2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    margin: 0;
+    font-weight: 600;
+  }
+  /* 和品牌标一样的黄色小方块 */
+  .section-head h2::before {
+    content: '';
+    flex: none;
+    width: 14px;
+    height: 14px;
+    background: var(--color-yellow);
+    border-radius: 4px;
+    transform: rotate(-10deg);
+  }
+
+  /*
+   * 尺寸照参照站：三张卡固定宽高比，Soundlinks 不设比例、撑满窄列剩余高度，两列自然齐底。
+   * 手机：单列，按 DOM 顺序 FydeOS → 中达源 → Merryking → Soundlinks，每张单独定比例。
+   */
+  .project-list {
+    --gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+  .col {
+    display: contents;
+  }
+  .project-item {
+    /* 卡片里的文字不参与选中 */
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+    min-width: 0;
+    margin: 0;
+    border-radius: 16px;
+    cursor: pointer;
+  }
+  .item-mk {
+    aspect-ratio: 1 / 0.96;
+  }
+  .item-fy {
+    aspect-ratio: 1 / 0.82;
+  }
+  .item-zdy {
+    aspect-ratio: 1.39189;
+  }
+  .item-sound {
+    aspect-ratio: 1 / 1.4;
+  }
+
+  /*
+   * 整卡链接是铺满卡片的透明层，不包住封面：Merryking 封面里有暂停按钮，按钮不能嵌在链接里。
+   * 焦点环画在卡片上，避免被封面层的 overflow: hidden 裁掉。
+   */
+  .card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+  .card-link:focus-visible {
+    outline: none;
+  }
+  .project-item:has(.card-link:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 6px;
+  }
+
+  /*
+   * 封面层叠在链接上面，但不接收指针，点击穿到下面的链接；封面里的按钮（Merryking 暂停）单独接收。
+   * hover 缩小只缩这一层，外层 article 和链接保持原尺寸：鼠标停在卡片边缘时，
+   * 卡片缩小不会让指针移出 hover 区域、来回触发缩放而抖动；缩小后露出的边缘也还能点进项目。
+   */
+  .card {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .card :global(button) {
+    pointer-events: auto;
+  }
+
+  /* hover 和键盘聚焦：卡片缩小，覆一层浅色 */
+  .project-item:hover .card,
+  .project-item:focus-within .card {
+    transform: scale(0.95);
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: rgba(250, 250, 248, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .project-item:hover .card::after,
+  .project-item:focus-within .card::after {
+    opacity: 1;
+  }
+
+  @media (width < 810px) {
+    .projects {
+      padding-top: 24px;
+    }
+    .section-head {
+      margin-bottom: 21px;
+    }
+  }
+  @media (width >= 810px) {
+    .project-list {
+      display: grid;
+      grid-template-columns: 476fr 228fr;
+      column-gap: var(--gap);
+    }
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      min-width: 0;
+    }
+    .item-fy {
+      aspect-ratio: 16 / 9;
+    }
+    .item-sound {
+      aspect-ratio: auto;
+      flex: 1 1 0;
+      min-height: 0;
+    }
+  }
+  @media (width >= 1200px) {
+    .project-list {
+      grid-template-columns: 675fr 323fr;
+    }
+  }
+  @media (width >= 1440px) {
+    .project-list {
+      --gap: 24px;
+      grid-template-columns: 825fr 399fr;
+    }
+  }
+</style>

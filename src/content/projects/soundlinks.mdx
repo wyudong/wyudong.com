@@ -1,0 +1,49 @@
+---
+title: Soundlinks
+subtitle: 通过声音传输数据
+period: 2016 — 2019
+role: 技术负责人
+stack: [JavaScript, Vue, Node.js, PHP, Laravel, MySQL, iOS, Android]
+summary: 从实验室里的声音编解码，做到音乐节现场使用的 App，打造音乐版权平台。
+metrics:
+  - { value: "2", unit: 项, label: 国际专利 }
+  - { value: "100+", label: 合作音乐人 }
+  - { value: "5", unit: 人, label: 团队管理 }
+order: 4
+---
+
+import Figure from '../../components/Figure.astro';
+import Flow from '../../components/diagrams/Flow.astro';
+
+## 项目背景
+
+[Soundlinks](https://soundlinks.net) 是一项利用声音传输数据的技术：在不改变听感的前提下，把信息编码进音频里。手机麦克风对着声音就能还原信息。电视、广播、商场、演出的背景音乐因此都能变成一个入口，也可以用来保护音乐版权。
+
+<Figure caption="Soundlinks 用声音传输数据的过程">
+  <Flow
+    label="声音传数据的过程：编码、播放、采集、解码"
+    steps={[
+      { title: '编码', note: '把一个 ID 以数字信号编码进音频' },
+      { title: '播放', note: '音乐正常播放' },
+      { title: '采集', note: '手机麦克风收听' },
+      { title: '解码', note: '从音频里解码还原出 ID 信息', accent: true },
+    ]}
+  />
+</Figure>
+
+## 我做了什么
+
+- **工程化**：围绕信号衰减、环境噪声、多径回声和设备差异优化编解码流程，让识别在真实环境里稳定、准确。
+- **多端产品**：规划 iOS、Android、Web 三端产品，上线声音识别 App 和音乐版权平台。
+- **开发者 SDK**：把编解码能力封装成 iOS / Android SDK、服务端编解码服务，写[开发者文档](https://developer.soundlinks.net/api/)，形成「客户端 + 云端」的接入方案。
+- **团队与客户**：带 5 人前后端团队做任务拆解和排期，对接广告、音乐平台、教育行业的客户。
+
+## 技术细节
+
+**手机端实时解码：** App 要一边采集麦克风数据，一边实时解码音乐里的信息。以 iOS 为例，底层用 Audio Unit（RemoteIO）采集，在音频回调里拿到 PCM 浮点数据，先写进环形缓冲区，防止阻塞音频回调，再交给后台线程用 Accelerate 的 vDSP 做 FFT，在目标频段里用算法解析信号。
+
+**多频段编码：** 编码覆盖人类可听声音的不同频段。18–20kHz 接近人耳上限，几乎听不见，实现编码也最简单，但容易被音频压缩和普通扬声器滤掉。而 8kHz 甚至 3–4kHz 的信号落进人耳敏感、音乐能量集中的区域，既要不影响听感，又要扛住原音乐的干扰，频率越低难度越大。编解码算法也一直在跟着迭代优化。
+
+## 结果与回顾
+
+从一个实验室想法慢慢落地到 SUMMER SONIC 国际音乐节现场，嵌入蜻蜓 FM、UUABC 等合作方的 App 完成集成验证，并在 AWS、Plug & Play 的国际创业比赛中拿到奖项和孵化资源。虽然产品最终没成功，但对我个人而言，是职业生涯的开始、全栈经验的积累、一次终身难忘的创业经历。

@@ -1,0 +1,88 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import BrowserMock from './BrowserMock.astro';
+
+// 正文插图。给 src 时渲染图片（给 frame 就套浏览器窗口框，值是标题栏文字）；
+// 不给 src 时渲染 slot，用来放示意图或视频。
+interface Props {
+  src?: ImageMetadata;
+  alt?: string;
+  caption?: string;
+  frame?: string;
+  /** 两张并排（放在 <div class="pair"> 里）时传，只影响图片 sizes */
+  half?: boolean;
+}
+
+const { src, alt = '', caption, frame, half = false } = Astro.props;
+const sizes = half
+  ? '(min-width: 1440px) 612px, (min-width: 1200px) 492px, (min-width: 810px) 345px, calc(100vw - 32px)'
+  : '(min-width: 1440px) 1248px, (min-width: 1200px) 1008px, (min-width: 810px) 714px, calc(100vw - 32px)';
+const widths = src ? [...[480, 800, 1200, 1600, 2000, 2496].filter((w) => w < src.width), src.width] : [];
+---
+
+<figure class="figure">
+  {src && frame && (
+    <div class="media framed">
+      <BrowserMock title={frame}>
+        <Image src={src} alt={alt} widths={widths} sizes={sizes} />
+      </BrowserMock>
+    </div>
+  )}
+  {src && !frame && (
+    <div class="media plain">
+      <Image src={src} alt={alt} widths={widths} sizes={sizes} />
+    </div>
+  )}
+  {!src && (
+    <div class="media">
+      <slot />
+    </div>
+  )}
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .figure {
+    margin: 48px 0;
+  }
+  .media :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .plain {
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+  }
+  .framed {
+    --mock-radius: 14px;
+    --mock-bar-height: 32px;
+    --mock-bar-font: 12px;
+    --mock-bar-padding: 0 16px;
+  }
+  figcaption {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  @media (width < 810px) {
+    .figure {
+      margin: 36px 0;
+    }
+    .plain {
+      border-radius: 10px;
+    }
+    .framed {
+      --mock-radius: 10px;
+      --mock-bar-height: 24px;
+      --mock-bar-font: 10px;
+    }
+    figcaption {
+      margin-top: 10px;
+    }
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+title: Merryking
+subtitle: 电商独立站与运营自动化
+period: 2025 — 至今
+role: 独立开发
+stack: [Next.js, Tailwind CSS, Node.js, OSS, CDN, Docker, Feishu]
+summary: 建立电商独立站，让每条询盘都能追溯到具体的 Google Ads 点击，用浏览器脚本接管阿里国际站的商品导入导出、批量编辑和主图优化。
+metrics:
+  - { value: "158", unit: 个, label: 商品信息生成 }
+  - { value: "98", unit: 分, label: Core Web Vitals 性能 }
+  - { value: "1301", unit: 个, label: 国际站商品导出 }
+  - { value: "720", unit: 张, label: AI 主图优化 }
+order: 3
+---
+
+import Figure from '../../components/Figure.astro';
+import Flow from '../../components/diagrams/Flow.astro';
+
+## 项目背景
+
+[Merryking](https://www.merryking.com) 是一家做电源适配器和充电器的制造商，主要面向海外客户。官网原来在建站 SaaS 上，内容和数据都在别人手里。运营上还有一堆重复劳动：询盘要人工转发、招聘工人要回答重复问题、阿里国际站要手动迁移一千多个商品。
+
+## 我做了什么
+
+- **独立站**：用 Next.js 重写官网。158 个商品的规格和详情从旧网站以及 PDF 手册提取生成。图片放阿里云 OSS 加 CDN 全球加速。GitHub Actions 构建 Docker 镜像，服务器拉取后由 Caddy 反向代理并自动签发证书。
+- **运营后台**：管理后台显示询盘和联系方式点击的详情。运营能看到每条线索的广告参数和 IP 所在地，新询盘由飞书机器人推送到群组。
+- **阿里国际站工具链**：一组 Tampermonkey 脚本加本地 Node 脚本，导出 1301 个商品、31713 张图片，生成可直接导入的发品 Excel 模板，可批量填写标题、参数、定价和卖点等字段。调用 OpenAI 图像生成模型美化主图风格，处理 720 张主图。
+
+## 技术细节
+
+**Google Ads 转化与归因：** 原来 Google Ads 的主要转化是点击邮箱等联系入口，这些只能说明访客有联系意向，出价却一直朝它们优化。为此定了一份转化优化计划：把广告点击、真实询盘和业务员确认的有效询盘串联起来，再把有效询盘回传给 Google Ads，让投放朝有效询盘优化。
+
+<Figure caption="Google Ads 转化优化链路">
+  <Flow
+    label="转化优化链路：广告访问，联系网站，登记询盘，确认有效，回传 Google Ads"
+    steps={[
+      { title: '广告访问', note: '存下广告点击 ID 和 UTM' },
+      { title: '联系网站', note: '提交表单，或发送带联系代码的邮件' },
+      { title: '登记询盘', note: '按联系代码对应广告来源' },
+      { title: '确认有效', note: '业务员判断是否值得跟进' },
+      { title: '回传 Google Ads', note: '通过 Data Manager 上传有效询盘', accent: true },
+    ]}
+  />
+</Figure>
+
+**图片按需优化：** Next.js 的 `<Image>` 换成自定义 loader，使用 OSS 的图片参数处理缩放和转换 WebP，CDN 按参数缓存每个尺寸。Core Web Vitals 性能指标分数 98 分。

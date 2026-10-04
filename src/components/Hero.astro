@@ -1,0 +1,220 @@
+<section class="hero" aria-labelledby="hero-title">
+  <div class="copy">
+    <h1 id="hero-title">
+      <span class="line">紙上得來終覺淺，</span>
+    </h1>
+    <p class="description">
+      最擅长 Web 全栈，也做桌面端和移动端，还为企业搭建自动化流程。喜欢先弄明白问题，再把它做成好用的产品。
+    </p>
+    <div class="actions">
+      <a class="primary" href="#projects">
+        看看我的作品
+      </a>
+    </div>
+  </div>
+
+  <div class="playground" data-field>
+    <div class="canvas-wrap">
+      <canvas
+        tabindex="0"
+        role="button"
+        aria-label="整理色块：鼠标经过或点击整理附近黄色方块"
+        aria-describedby="play-hint"
+      ></canvas>
+      <noscript>
+        <div class="art-fallback" aria-hidden="true"></div>
+      </noscript>
+    </div>
+    <div class="play-foot">
+      <p class="hint" id="play-hint">
+        试着动一动
+      </p>
+    </div>
+    <p class="sr-only" aria-live="polite" data-status></p>
+  </div>
+</section>
+
+<script>
+  import { initField } from '../scripts/field';
+
+  document.querySelectorAll<HTMLElement>('[data-field]').forEach(initField);
+</script>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 1.06fr 1fr;
+    align-items: center;
+    min-height: clamp(560px, calc(100svh - 235px), 730px);
+    gap: 5px;
+    padding: 26px 0 40px;
+  }
+  .copy {
+    position: relative;
+    z-index: 1;
+    padding: 15px 0 40px;
+  }
+  h1 {
+    font-size: 60px;
+    line-height: 1.37;
+    letter-spacing: 0;
+    font-weight: 600;
+    margin: 0 0 28px;
+    word-break: keep-all;
+  }
+  .line {
+    display: block;
+  }
+  .description {
+    font-size: 16px;
+    line-height: 1.95;
+    max-width: 29em;
+    margin: 0;
+    color: #555a52;
+    text-wrap: pretty;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    margin-top: 34px;
+    flex-wrap: wrap;
+  }
+  .primary {
+    /* 按钮文字不参与选中 */
+    -webkit-user-select: none;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--color-ink);
+    color: white;
+    padding: 15px 26px;
+    border-radius: 50px;
+    font-size: 15px;
+    transition:
+      transform 0.2s,
+      background 0.2s;
+  }
+  .primary:hover {
+    background: #3b4035;
+    transform: translateY(-2px);
+  }
+  .canvas-wrap {
+    width: 100%;
+    height: clamp(320px, calc(100svh - 340px), 510px);
+    position: relative;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+    touch-action: pan-y;
+    border-radius: 22px;
+  }
+  .art-fallback {
+    position: absolute;
+    inset: 20%;
+    background: repeating-conic-gradient(var(--color-yellow) 0% 25%, var(--color-ink) 0% 50%) 50% / 60px 60px;
+    border-radius: 50%;
+  }
+  /* 提示放在动画容器右下方，贴近画布 */
+  .play-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin: -8px 12px 0 26px;
+    min-height: 24px;
+  }
+  .hint {
+    font-size: 13px;
+    color: var(--color-muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+  .hint::before {
+    content: '↖';
+    margin-right: 7px;
+    color: var(--color-ink);
+  }
+
+  /* 字号跟版心跳档：1248 / 1008 / 714 */
+  @media (width < 1440px) {
+    h1 {
+      font-size: 52px;
+    }
+  }
+  @media (width < 1200px) {
+    .hero {
+      grid-template-columns: 1.12fr 1fr;
+    }
+    h1 {
+      font-size: 42px;
+    }
+    .play-foot {
+      margin-left: 0;
+    }
+    .hint {
+      font-size: 12px;
+    }
+  }
+  @media (width < 810px) {
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 0;
+      padding: 42px 0 27px;
+      gap: 0;
+    }
+    .copy {
+      padding: 0;
+    }
+    h1 {
+      font-size: clamp(30px, 7.8vw, 54px);
+      line-height: 1.45;
+      margin-bottom: 23px;
+    }
+    .description {
+      line-height: 1.9;
+      max-width: 36em;
+    }
+    .actions {
+      margin-top: 25px;
+      gap: 24px;
+    }
+    .primary {
+      padding: 13px 22px;
+      font-size: 14px;
+    }
+    .playground {
+      width: 100%;
+      max-width: 420px;
+      margin: 14px auto 0;
+    }
+    .canvas-wrap {
+      height: auto;
+      aspect-ratio: 1.2;
+    }
+    .play-foot {
+      margin: -12px 6px 0;
+      justify-content: center;
+      gap: 22px;
+    }
+  }
+  @media print {
+    .playground,
+    .actions {
+      display: none;
+    }
+    .hero {
+      display: block;
+      min-height: auto;
+    }
+    .copy {
+      padding-bottom: 20px;
+    }
+  }
+</style>

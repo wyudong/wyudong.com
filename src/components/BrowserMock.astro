@@ -1,0 +1,64 @@
+---
+// 带标题栏的浏览器窗口框。外观可由父级用 CSS 变量调整：
+// --mock-border、--mock-shadow、--mock-radius、--mock-bar-height、--mock-bar-font、--mock-bar-padding、--mock-bar-gap
+// 窗口本身是名为 mock 的容器，里面的内容可以用 cqi / @container mock 按窗口宽度缩放。
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="browser-mock">
+  <div class="browser-bar" aria-hidden="true">
+    <span>{title}</span>
+  </div>
+  <div class="browser-body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .browser-mock {
+    container: mock / inline-size;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--mock-border, #cbd2d6);
+    border-radius: var(--mock-radius, 10px);
+    box-shadow: var(--mock-shadow, 0 20px 45px -18px #34475345);
+  }
+  .browser-bar {
+    flex: none;
+    position: relative;
+    z-index: 4;
+    height: var(--mock-bar-height, 22px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--mock-bar-gap, 6px);
+    padding: var(--mock-bar-padding, 0 12px);
+    background: #f8fafb;
+    border-bottom: 1px solid #e2e6e8;
+    color: #66727a;
+    font-size: var(--mock-bar-font, 9px);
+    text-align: center;
+  }
+  .browser-bar span {
+    white-space: nowrap;
+  }
+  .browser-body {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  @media (width < 810px) {
+    .browser-bar {
+      height: var(--mock-bar-height, 20px);
+    }
+  }
+</style>

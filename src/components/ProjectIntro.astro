@@ -1,0 +1,159 @@
+---
+import Tag from './Tag.astro';
+
+// 详情页的标题区：项目名、副标题、导语，以及时间 / 角色 / 技术栈三项元信息。
+interface Props {
+  title: string;
+  subtitle: string;
+  summary: string;
+  period: string;
+  role: string;
+  stack: string[];
+}
+
+const { title, subtitle, summary, period, role, stack } = Astro.props;
+---
+
+<header class="intro">
+  <div>
+    <h1>{title}</h1>
+    <p class="subtitle">{subtitle}</p>
+    <p class="summary">{summary}</p>
+  </div>
+  <dl class="meta">
+    <div>
+      <dt>时间</dt>
+      <dd>{period}</dd>
+    </div>
+    <div>
+      <dt>角色</dt>
+      <dd>{role}</dd>
+    </div>
+    <div class="meta-stack">
+      <dt>技术栈</dt>
+      <dd class="stack">
+        {stack.map((item) => (
+          <Tag>{item}</Tag>
+        ))}
+      </dd>
+    </div>
+  </dl>
+</header>
+
+<style>
+  .intro {
+    display: grid;
+    gap: 32px;
+    padding-top: 56px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 52px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+  .subtitle {
+    margin: 12px 0 0;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #555a52;
+  }
+  .summary {
+    max-width: 36em;
+    margin: 24px 0 0;
+    font-size: 16px;
+    line-height: 1.95;
+    color: #555a52;
+    text-wrap: pretty;
+  }
+  /*
+   * 元信息用固定网格，不用 flex-wrap：换行位置不随字体宽度变化，
+   * 网页字体加载完成前后布局一致，避免下面的内容跳动（CLS）。
+   */
+  .meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 20px 28px;
+    margin: 0;
+  }
+  .meta div {
+    min-width: 0;
+  }
+  .meta-stack {
+    grid-column: 1 / -1;
+  }
+  dt {
+    margin-bottom: 4px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  dd {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  /* 技术栈是一排标签，装不下就换行；每个标签内部不断行（样式在 Tag.astro 里） */
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  @media (width >= 1200px) {
+    .intro {
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 48px;
+    }
+    .meta {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+      gap: 20px;
+      padding-top: 14px;
+    }
+  }
+  @media (width < 1440px) {
+    .intro {
+      padding-top: 48px;
+    }
+    h1 {
+      font-size: 44px;
+    }
+    .subtitle {
+      font-size: 18px;
+    }
+  }
+  @media (width < 1200px) {
+    .intro {
+      padding-top: 40px;
+    }
+    h1 {
+      font-size: 36px;
+    }
+    .subtitle {
+      font-size: 17px;
+    }
+  }
+  @media (width < 810px) {
+    .intro {
+      gap: 24px;
+      padding-top: 32px;
+    }
+    h1 {
+      font-size: clamp(28px, 7vw, 40px);
+    }
+    .subtitle {
+      margin-top: 8px;
+      font-size: 16px;
+    }
+    .summary {
+      margin-top: 18px;
+      line-height: 1.9;
+    }
+    .meta {
+      gap: 16px 20px;
+    }
+  }
+</style>

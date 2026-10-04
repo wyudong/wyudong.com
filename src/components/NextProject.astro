@@ -1,0 +1,90 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+// 详情页底部：左边回到全部项目，右边是下一个项目的大链接。
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+---
+
+<nav class="pager" aria-label="项目导航">
+  <a class="back" href="/#projects">
+    <span aria-hidden="true">←</span> 全部项目
+  </a>
+  <a class="next" href={`/${project.id}/`}>
+    <span class="label">下一个项目</span>
+    <span class="name">
+      {project.data.title}
+      <span class="arrow" aria-hidden="true">
+        →
+      </span>
+    </span>
+    <span class="period">{project.data.period}</span>
+  </a>
+</nav>
+
+<style>
+  .pager {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 80px;
+    padding: 48px 0 64px;
+    border-top: 1px solid var(--color-line);
+  }
+  .back {
+    padding-block: 6px;
+    font-size: 14px;
+    color: var(--color-muted);
+    transition: color 0.2s;
+  }
+  .back:hover {
+    color: var(--color-ink);
+  }
+  .next {
+    display: grid;
+    justify-items: end;
+    gap: 6px;
+    text-align: right;
+  }
+  .label,
+  .period {
+    font-size: 13px;
+    color: var(--color-muted);
+  }
+  .name {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 14px;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .arrow {
+    display: inline-block;
+    transition: transform 0.25s;
+  }
+  .next:hover .arrow {
+    transform: translateX(4px);
+  }
+
+  @media (width < 810px) {
+    .pager {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 32px;
+      margin-top: 56px;
+      padding: 40px 0 48px;
+    }
+    .next {
+      justify-items: start;
+      text-align: left;
+    }
+    .name {
+      font-size: 24px;
+    }
+  }
+</style>

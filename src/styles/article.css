@@ -1,0 +1,142 @@
+/*
+ * 项目详情页正文（MDX 渲染出来的 Markdown 元素）。
+ * 这些元素不带组件作用域，所以用 .article 前缀限定，只由 src/pages/[project].astro 引入。
+ * 不放进 @layer：站点没有 preflight，要显式盖掉浏览器默认的边距；也要能压过组件的 scoped 样式（如 .pair 里的 figure）。
+ */
+.article {
+  padding-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.95;
+  color: #555a52;
+}
+/* 文字有行宽（约 36 个汉字），插图可以占满版心 */
+.article > :is(p, h2, h3, ul, ol, blockquote) {
+  max-width: 36em;
+}
+.article p {
+  margin: 0 0 1.25em;
+  text-wrap: pretty;
+}
+.article h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 72px 0 20px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-ink);
+  scroll-margin-top: 28px;
+}
+/* 和首页"做过的项目"一样的黄色小方块 */
+.article h2::before {
+  content: '';
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: var(--color-yellow);
+  border-radius: 4px;
+  transform: rotate(-10deg);
+}
+.article h3 {
+  margin: 40px 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--color-ink);
+}
+.article ul,
+.article ol {
+  margin: 0 0 1.25em;
+  padding-left: 1.3em;
+}
+.article li {
+  margin: 0.5em 0;
+  padding-left: 0.2em;
+}
+.article li::marker {
+  color: #a3a79c;
+}
+.article strong {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.article a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-yellow);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  transition: background 0.2s;
+}
+.article a:hover {
+  background: #ffe14d66;
+}
+.article code {
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+  background: #efefe9;
+  color: var(--color-ink);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.875em;
+}
+.article pre {
+  max-width: 100%;
+  margin: 28px 0;
+  padding: 18px 22px;
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #efefe9;
+  line-height: 1.7;
+}
+/* Shiki 把主题底色写在行内样式里，这里统一成页面的浅灰 */
+.article pre.astro-code {
+  background-color: #efefe9 !important;
+}
+.article pre code {
+  padding: 0;
+  background: none;
+  font-size: 13.5px;
+}
+.article blockquote {
+  margin: 28px 0;
+  padding: 2px 0 2px 20px;
+  border-left: 3px solid var(--color-yellow);
+  color: var(--color-muted);
+}
+.article hr {
+  margin: 56px 0;
+  border: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+/* 两张图并排 */
+.article .pair {
+  display: grid;
+  gap: 24px;
+  margin: 48px 0;
+}
+.article .pair > .figure {
+  margin: 0;
+}
+@media (width >= 810px) {
+  .article .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width < 810px) {
+  .article {
+    line-height: 1.9;
+  }
+  .article h2 {
+    margin-top: 56px;
+    font-size: 18px;
+  }
+  .article pre {
+    padding: 14px 16px;
+  }
+  .article pre code {
+    font-size: 12.5px;
+  }
+}

@@ -1,0 +1,94 @@
+---
+// 详情页的关键数字：大号数字 + 小号单位 + 说明。≥1200 一行排完，更窄时两列。
+interface Props {
+  metrics: { value: string; unit?: string; label: string }[];
+}
+
+const { metrics } = Astro.props;
+---
+
+<section class="metrics" aria-labelledby="metrics-title">
+  <h2 id="metrics-title" class="sr-only">
+    关键数字
+  </h2>
+  <ul style={`--cols: ${Math.min(metrics.length, 4)}`}>
+    {metrics.map((metric) => (
+      <li>
+        <span class="value">
+          {metric.value}
+          {metric.unit && <span class="unit">{metric.unit}</span>}
+        </span>
+        <span class="label">{metric.label}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .metrics {
+    margin-top: 56px;
+    /* 只有上边框，和正文之间靠留白分开 */
+    border-top: 1px solid var(--color-line);
+  }
+  ul {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: 32px 24px;
+    margin: 0;
+    padding: 40px 0;
+    list-style: none;
+  }
+  li {
+    min-width: 0;
+  }
+  .value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.14em;
+    font-size: 50px;
+    font-weight: 400;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .unit {
+    font-size: 0.4em;
+    font-weight: 400;
+  }
+  .label {
+    display: block;
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  @media (width < 1440px) {
+    .metrics {
+      margin-top: 48px;
+    }
+    .value {
+      font-size: 48px;
+    }
+  }
+  @media (width < 1200px) {
+    ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .value {
+      font-size: 40px;
+    }
+  }
+  @media (width < 810px) {
+    .metrics {
+      margin-top: 40px;
+    }
+    ul {
+      gap: 24px 16px;
+      padding: 32px 0;
+    }
+    .value {
+      font-size: 36px;
+    }
+  }
+</style>

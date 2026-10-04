@@ -1,0 +1,10 @@
+# dist、.astro、node_modules、字体生成物已经在 .gitignore 里，Prettier 默认会跳过。
+# 下面是 .gitignore 没有覆盖、但不该被格式化的东西。
+
+# 正文是 MDX：Prettier 的 MDX 解析不认 {/* */} 注释和 frontmatter 里的内联对象，会改坏。
+*.mdx
+
+# 规划文档，里面有手排的表格。
+docs
+
+pnpm-lock.yaml

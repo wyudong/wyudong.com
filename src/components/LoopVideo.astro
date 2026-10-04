@@ -1,0 +1,108 @@
+---
+// 静音循环的短视频（代替 GIF）。滚出视口时暂停；开启减弱动效时默认不播放；右下角按钮可暂停 / 播放。
+interface Props {
+  src: string;
+  /** 没播放时显示的画面 */
+  poster?: string;
+  label: string;
+  width: number;
+  height: number;
+}
+
+const { src, poster, label, width, height } = Astro.props;
+---
+
+<div class="loop-video" data-loop-video style={`max-width: ${width}px`}>
+  <video
+    src={src}
+    poster={poster}
+    width={width}
+    height={height}
+    muted
+    loop
+    playsinline
+    preload="none"
+    aria-label={label}
+  ></video>
+  <button class="loop-toggle" type="button" aria-pressed="false" aria-label="暂停视频" hidden>
+    <svg class="pause-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M4 2h3v12H4zm5 0h3v12H9z"></path>
+    </svg>
+    <svg class="play-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M4 2l10 6-10 6z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-loop-video]').forEach((root) => {
+    const video = root.querySelector('video');
+    const button = root.querySelector<HTMLButtonElement>('.loop-toggle');
+    if (!video || !button) return;
+
+    let wanted = !reduce.matches;
+    let visible = false;
+    const apply = () => {
+      if (wanted && visible) video.play().catch(() => {});
+      else video.pause();
+    };
+    const sync = () => button.setAttribute('aria-pressed', String(video.paused));
+
+    video.addEventListener('play', sync);
+    video.addEventListener('pause', sync);
+    button.addEventListener('click', () => {
+      wanted = video.paused;
+      apply();
+    });
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      apply();
+    }).observe(root);
+    button.hidden = false;
+    sync();
+  });
+</script>
+
+<style>
+  .loop-video {
+    position: relative;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: #fafafa;
+  }
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .loop-toggle {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid #d6d7cf;
+    border-radius: 50%;
+    background: #ffffffd9;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .loop-toggle svg {
+    width: 11px;
+    height: 11px;
+  }
+  .loop-toggle[aria-pressed='true'] .pause-icon,
+  .loop-toggle[aria-pressed='false'] .play-icon {
+    display: none;
+  }
+  .loop-toggle[hidden] {
+    display: none;
+  }
+</style>

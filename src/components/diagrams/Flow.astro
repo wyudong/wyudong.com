@@ -1,0 +1,113 @@
+---
+// 流程示意：一排步骤卡片，中间用箭头连。容器变窄时改成竖排（5 步及以上更早竖排）。
+// accent 的步骤用黄底强调。
+interface Step {
+  title: string;
+  note?: string;
+  accent?: boolean;
+}
+interface Props {
+  label: string;
+  steps: Step[];
+}
+
+const { label, steps } = Astro.props;
+---
+
+<div class:list={['flow-wrap', { long: steps.length > 4 }]}>
+  <ol class="flow" aria-label={label} style={`--n: ${steps.length}`}>
+    {steps.map((step, i) => (
+      <li class:list={['step', { accent: step.accent }]}>
+        <span class="index">{String(i + 1).padStart(2, '0')}</span>
+        <span class="title">{step.title}</span>
+        {step.note && <span class="note">{step.note}</span>}
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .flow-wrap {
+    container-type: inline-size;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px 18px 20px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+  }
+  .step + .step::before {
+    content: '→';
+    position: absolute;
+    top: 50%;
+    left: -24px;
+    translate: 0 -50%;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--color-muted);
+  }
+  .accent {
+    background: var(--color-yellow);
+    border-color: #e3c53c;
+  }
+  .index {
+    font-size: 12px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-muted);
+  }
+  .accent .index {
+    color: #5c4f00;
+  }
+  .title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--color-ink);
+  }
+  .note {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+  .accent .note {
+    color: #4d4300;
+  }
+
+  @container (width < 960px) {
+    .long .flow {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+    }
+    .long .step + .step::before {
+      content: '↓';
+      top: -22px;
+      left: 50%;
+      translate: -50% 0;
+    }
+  }
+  @container (width < 700px) {
+    .flow {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+    }
+    .step + .step::before {
+      content: '↓';
+      top: -22px;
+      left: 50%;
+      translate: -50% 0;
+    }
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+title: 中达源
+subtitle: 案件管理与资金分析系统
+period: 2024 — 至今
+role: 独立开发，从需求到部署维护
+stack: [Next.js, React, PostgreSQL, Node.js, Electron, Docker]
+summary: 从 105 行的脚本，成长为 Web + 桌面双端交付的案件管理系统。
+metrics:
+  - { value: "5", unit: 项, label: 软件著作权 }
+  - { value: "60+", unit: 个, label: 发布版本 }
+  - { value: "500", unit: MB, label: 单次可处理的流水文件 }
+order: 2
+---
+
+import Figure from '../../components/Figure.astro';
+import Flow from '../../components/diagrams/Flow.astro';
+import FifoBars from '../../components/diagrams/FifoBars.astro';
+import traceTree from '../../assets/projects/zhongdayuan/trace-tree.png';
+import traceFlow from '../../assets/projects/zhongdayuan/trace-flow.png';
+
+## 项目背景
+
+客户的日常工作是分析银行流水。一个案子涉及几十个账户，交易从几万行到上百万行，要回答的问题是：钱流到哪里去了？以前这些工作在 Excel 里手工标记，一套穿透可能要做几天，条件一改就得重来。
+
+起初我写了一个 105 行的 Node 脚本，验证「先进先出」的穿透规则能不能算出和人工一致的结果。跑通之后，需求一项项加进来：多家银行的流水格式、案件协作、导出底稿、离线版本。一个脚本就这样变成了案件管理系统。
+
+<Figure caption="资金穿透功能的主要步骤">
+  <Flow
+    label="处理流程：导入、清洗、穿透、导出"
+    steps={[
+      { title: '导入', note: '多家银行的 Excel 流水，自动识别表头' },
+      { title: '清洗', note: '多工作表合并、去重，统一成一套字段' },
+      { title: '穿透', note: '按先进先出逐层追踪资金去向', accent: true },
+      { title: '导出', note: '资金树、流向图、工作底稿和调证清单' },
+    ]}
+  />
+</Figure>
+
+## 我做了什么
+
+整个项目由我一个人负责：和客户沟通需求、设计方案、开发、部署，以及上线后的维护。系统分四个主要部分：
+
+- **资金分析**：交易筛选、资金穿透、生成资金树和流向图，结果可导出为工作底稿和调证清单。
+- **数据清洗**：解析多家国内银行的流水格式，多工作表合并去重，单次可处理 500 MB 量级的 Excel 文件。
+- **案件看板**：案件创建、进度跟踪、回复流转、消息提醒。权限按用户角色、部门层级和案件参与关系三层控制，所有操作留审计记录。
+- **授权分发**：桌面版的离线授权（生成、激活、解绑、停用）与版本分发。
+
+<Figure
+  src={traceTree}
+  alt="资金分析的穿透结果，资金树状关系"
+  caption="资金分析：根据选定的穿透目标，展示资金树状关系（图中均为模拟数据）"
+/>
+
+<Figure
+  src={traceFlow}
+  alt="资金流向图"
+  caption="接上图，用 React Flow 绘制资金流向图，可导出为 XML"
+/>
+
+## 技术细节
+
+**穿透算法：** 核心是 FIFO（First In First Out）加 BFS（Breadth-First Search）：每笔入账按先进先出匹配到之后的支出，再对每个下游账户做广度遍历，逐层往下追踪。另外还要考虑余额、整进整出、小额交易等特殊规则。
+
+<Figure>
+  <FifoBars />
+</Figure>
+
+**表头识别：** 各家银行导出的流水表头五花八门，系统维护了 99 个中文表头的别名，导入时自动识别交易日期、账号、收支方向等字段。
+
+**大表写入：** 数据库存储的流水按月做 PostgreSQL 分区，导入走流式 COPY，每批 10 万行。建分区和 COPY 拆成两个事务，避免大批量导入时的锁冲突。
+
+**离线桌面版：** Electron 内嵌 PostgreSQL 17，用户双击安装就能用，无需额外安装依赖。安装包体积从 269 MB 压缩至 129 MB。授权用 Ed25519 签名离线校验，不依赖联网。
+
+**单元测试：** 资金穿透和数据清洗都有测试覆盖，共 40 个测试文件，核心业务逻辑覆盖率 > 93%。

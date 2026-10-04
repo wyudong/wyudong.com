@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import BrowserMock from '../BrowserMock.astro';
+import traceFlow from '../../assets/projects/zhongdayuan/trace-flow.png';
+---
+
+<div class="project-cover cover-zdy">
+  <div class="stage">
+    <div class="zdy-window">
+      <BrowserMock title="中达源案件管理系统">
+        <Image
+          src={traceFlow}
+          widths={[560, 900, 1400, 2000, 2700]}
+          sizes="(min-width: 1440px) 751px, (min-width: 1200px) 614px, (min-width: 810px) 433px, calc((100vw - 32px) * 0.91)"
+          loading="lazy"
+          alt="中达源案件管理系统的资金流向图界面"
+        />
+      </BrowserMock>
+    </div>
+  </div>
+</div>
+
+<style>
+  .project-cover {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .cover-zdy {
+    background:
+      radial-gradient(ellipse at 13% 25%, #f3c1b6 0, transparent 60%),
+      radial-gradient(ellipse at 91% 70%, #eeb2bf 0, transparent 65%),
+      radial-gradient(ellipse at 55% 110%, #f7d2bf 0, transparent 65%), #faf0ee;
+    --mock-border: #e8cbc5;
+    --mock-shadow: 0 28px 45px -16px #8a3b3040;
+  }
+  .stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /*
+   * 窗口固定比例，上下留白和左右一样，都是舞台宽度的 4.5%。
+   * 舞台比例 1.39189，窗口高 = 1 / 1.39189 − 0.09 = 0.6285 倍舞台宽，比例 0.91 / 0.6285 ≈ 1.448。
+   */
+  .zdy-window {
+    position: relative;
+    width: 91%;
+    aspect-ratio: 1.448;
+  }
+  /* 截图铺满窗口，从左上角对齐，多出来的部分裁掉；截图比例 1.5 左右时只裁掉底部一点 */
+  .zdy-window :global(img) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
+  }
+</style>

@@ -1,0 +1,13 @@
+---
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import ProjectMosaic from '../../components/ProjectMosaic.astro';
+import italicFont from '../../assets/fonts/plus-jakarta-sans-italic.woff2?url';
+---
+
+<Base title="Wang Yudong" description="Full-stack engineer">
+  {/* 首屏轮播标题的斜体，只有这一页用到 */}
+  <link slot="head" rel="preload" href={italicFont} as="font" type="font/woff2" crossorigin />
+  <Hero />
+  <ProjectMosaic />
+</Base>

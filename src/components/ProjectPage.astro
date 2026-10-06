@@ -1,0 +1,41 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ProjectIntro from './ProjectIntro.astro';
+import MetricGroup from './MetricGroup.astro';
+import NextProject from './NextProject.astro';
+import type { Project } from '../projects';
+import '../styles/article.css';
+
+// 详情页主体，中英两种语言的 [project].astro 共用
+interface Props {
+  entry: Project;
+  /** 缺省的下一个项目（按 order 循环），frontmatter 里的 next 优先 */
+  next: Project;
+}
+
+const { entry, next: nextByOrder } = Astro.props;
+const next = (entry.data.next && (await getEntry(entry.data.next))) || nextByOrder;
+const { Content } = await render(entry);
+
+const { title, subtitle, period, role, stack, summary, ogDescription, metrics } = entry.data;
+---
+
+<Base
+  title={`${title} · ${subtitle} — Wang Yudong`}
+  ogTitle={`${title} · ${subtitle}`}
+  description={ogDescription ?? summary}
+  ogType="article"
+>
+  {/* 页面顺序：标题区 → 关键数字 → 正文 */}
+  <ProjectIntro title={title} subtitle={subtitle} summary={summary} period={period} role={role} stack={stack} />
+  <MetricGroup metrics={metrics} />
+
+  <article class="project">
+    <div class="article">
+      <Content />
+    </div>
+  </article>
+
+  <NextProject project={next} />
+</Base>

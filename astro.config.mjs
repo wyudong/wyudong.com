@@ -1,9 +1,8 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
-
 import mdx from '@astrojs/mdx';
 import { satteri } from '@astrojs/markdown-satteri';
+import tailwindcss from '@tailwindcss/vite';
 
 const SITE = 'https://wyudong.com';
 
@@ -25,6 +24,13 @@ const externalLinksInNewTab = {
 
 export default defineConfig({
   site: SITE,
+
+  // 中文在根路径，英文在 /en/ 下；组件里用 Astro.currentLocale 判断语言，见 src/i18n.ts
+  i18n: {
+    locales: ['zh', 'en'],
+    defaultLocale: 'zh',
+    routing: { prefixDefaultLocale: false },
+  },
 
   // 正文代码块用浅色高亮，底色由 src/styles/article.css 统一
   markdown: {

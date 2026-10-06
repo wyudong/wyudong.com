@@ -1,0 +1,49 @@
+---
+title: Soundlinks
+subtitle: Transmitting data through sound
+period: 2016 — 2019
+role: Technical lead
+stack: [JavaScript, Vue, Node.js, PHP, Laravel, MySQL, iOS, Android]
+summary: Developed audio encoding and decoding into an app used at a music festival and a music copyright platform.
+metrics:
+  - { value: "2", label: International patents }
+  - { value: "100+", label: Partner musicians }
+  - { value: "5", label: Team members led }
+order: 4
+---
+
+import Figure from '../../../components/Figure.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
+
+## Background
+
+[Soundlinks](https://soundlinks.net) transmits data through sound. It encodes information into audio without changing how it sounds, then recovers it through a phone microphone. This lets users access information through music on TV, radio, in stores, or at live shows. The technology can also help protect music copyright.
+
+<Figure caption="How Soundlinks transmits data through sound">
+  <Flow
+    label="Transmitting data through sound: encode, play, capture, decode"
+    steps={[
+      { title: 'Encode', note: 'Encode an ID into the audio as a digital signal' },
+      { title: 'Play', note: 'The music plays as usual' },
+      { title: 'Capture', note: 'A phone microphone captures the audio' },
+      { title: 'Decode', note: 'Recover the ID from the audio', accent: true },
+    ]}
+  />
+</Figure>
+
+## What I did
+
+- **Engineering:** Optimized the encoding and decoding pipeline for signal attenuation, ambient noise, multipath echo, and device differences, for stable, accurate recognition in real environments.
+- **Multi-platform products:** Planned products for iOS, Android, and web, and launched a sound recognition app and a music copyright platform.
+- **Developer SDK:** Packaged the codec as iOS / Android SDKs and a server-side codec service, wrote [developer documentation](https://developer.soundlinks.net/api/), and provided client and cloud integration options.
+- **Team and clients:** Led a five-person frontend and backend team, planned tasks and schedules, and worked with advertising, music platform, and education clients.
+
+## Technical details
+
+**Real-time decoding on phones:** The app captures audio and decodes embedded information in real time. On iOS, Audio Unit (RemoteIO) captures PCM float data. The audio callback writes it to a ring buffer to avoid blocking. A background thread runs an FFT using Accelerate's vDSP, then extracts the signal from the target frequency bands.
+
+**Multi-band encoding:** The codec works across several audible frequency bands. At 18–20 kHz, signals are nearly inaudible and easiest to encode, but audio compression and ordinary speakers often filter them out. At 8 kHz or 3–4 kHz, hearing is more sensitive and the music itself contains more energy. Signals must resist interference without changing how the music sounds. Lower frequencies make this harder, so the codec needed ongoing refinement.
+
+## Results and reflections
+
+The technology progressed from a lab prototype to use at the SUMMER SONIC music festival. It was integrated and tested in partner apps, including Qingting FM and UUABC, and received awards and incubation support from AWS and Plug & Play startup competitions. The product ultimately did not succeed. It marked the start of my career, built my full-stack experience, and remains a memorable startup experience.

@@ -6,6 +6,12 @@
 //   Plus Jakarta Sans  英文字母、数字和英文标点。排在 font-family 最前面。
 //   Noto Sans SC       中文，以及英文字体范围以外的所有字符。
 //
+// 英文页另有一个字体名 Plus Jakarta Sans Punct，指向同一个英文字体文件，只管撇号、引号、破折号、省略号，
+// 在 :lang(en) 下排到最前面（见 src/styles/global.css）。中文页不受影响。
+//
+// 英文首页的轮播标题用斜体 Plus Jakarta Sans Italic：只含可打印 ASCII，字重固定 600，
+// 只在英文首页用到、只在那一页预加载（src/pages/en/index.astro），别的页面不会下载。
+//
 // 每个文件都包含全站所有页面用到的字。src/layouts/Base.astro 在 <head> 里预加载这两个文件，
 // 打开任何一页都会马上下载全部字体，换页直接用缓存。
 //
@@ -29,6 +35,14 @@ const LATIN = {
   url: 'https://raw.githubusercontent.com/google/fonts/8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf',
   sha256: '89b3fb38aa0d275d7a731d0d817a4f1622b316b4d7fbdedcf02ee9099ff68bc8',
 };
+const LATIN_ITALIC = {
+  family: 'Plus Jakarta Sans Italic',
+  out: 'plus-jakarta-sans-italic.woff2',
+  url: 'https://raw.githubusercontent.com/google/fonts/8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5/ofl/plusjakartasans/PlusJakartaSans-Italic%5Bwght%5D.ttf',
+  sha256: '9529eb888668b6a3c6dd75b6341a2fc5263fb6c9e788822e6117c29dd9e8b115',
+  // 标题是 600，只出这一个字重，文件更小
+  weight: 600,
+};
 const CJK = {
   family: 'Noto Sans SC Variable',
   out: 'noto-sans-sc.woff2',
@@ -41,6 +55,12 @@ const CJK = {
 // 空格留在中文字体里，全站原来按中文字体排好的行高就不会变。
 // 「·」「—」、中文引号、省略号、减号、箭头也不在范围里，继续用中文字体的样子。
 const isLatin = (cp) => (cp > 0x20 && cp <= 0x7e) || (cp >= 0xc0 && cp <= 0x24f);
+
+// 英文正文经 smartypants 生成的排版标点。中文页按上面的约定交给 Noto Sans SC；英文页里中文字体的这些字形太宽，
+// 所以字形也放进英文字体文件，另起一个只覆盖这几个字的字体名，只在英文页启用。
+const LATIN_PUNCT = 'Plus Jakarta Sans Punct';
+const PUNCT = new Set([...'‘’“”–—…'].map((ch) => ch.codePointAt(0)));
+const isPunct = (cp) => PUNCT.has(cp);
 
 async function walk(dir) {
   const files = [];
@@ -134,36 +154,67 @@ function toRange(cps) {
   return parts.join(',');
 }
 
-// 裁成一个 woff2。range 为 true 时在 @font-face 里写 unicode-range，只让这套字体显示这些字。
-async function subset({ family, out, url, sha256 }, cps, range) {
+// 内容没变就不写，dev 开着时跑 pnpm fonts / pnpm build 不会触发多余的热更新
+async function writeIfChanged(path, data) {
+  const old = await readFile(path).catch(() => null);
+  if (old?.equals(Buffer.from(data))) return;
+  await writeFile(path, data);
+}
+
+// 裁成一个 woff2，返回实际有字形的码位。weight 是数字时把字重轴固定在这个值。
+async function subset({ out, url, sha256, weight = WEIGHT }, cps) {
   const font = await source({ url, sha256 });
   const has = codepoints(font);
   const hit = cps.filter((cp) => has.has(cp));
   const woff2 = await subsetFont(font, String.fromCodePoint(...hit), {
     targetFormat: 'woff2',
-    variationAxes: { wght: WEIGHT },
+    variationAxes: { wght: weight },
   });
-  await writeFile(join(fontDir, out), woff2);
-  const face =
-    `@font-face{font-family:"${family}";font-style:normal;font-display:swap;font-weight:${WEIGHT.min} ${WEIGHT.max};` +
-    `src:url("../assets/fonts/${out}") format("woff2")${range ? `;unicode-range:${toRange(hit)}` : ''}}`;
-  return { face, bytes: woff2.length, missing: cps.filter((cp) => !has.has(cp)) };
+  await writeIfChanged(join(fontDir, out), woff2);
+  return { hit, bytes: woff2.length, missing: cps.filter((cp) => !has.has(cp)) };
 }
 
+// 给了 range 就在 @font-face 里写 unicode-range，只让这个字体名显示这些字
+const fontFace = (family, out, range, { style = 'normal', weight = `${WEIGHT.min} ${WEIGHT.max}` } = {}) =>
+  `@font-face{font-family:"${family}";font-style:${style};font-display:swap;font-weight:${weight};` +
+  `src:url("../assets/fonts/${out}") format("woff2")${range ? `;unicode-range:${toRange(range)}` : ''}}`;
+
 const used = await usedChars();
-await rm(fontDir, { recursive: true, force: true });
+// 不先清空目录。dev 开着时字体文件哪怕只消失一下，dev server 也会一直当它不存在、不再改写字体地址，
+// 英文页的字体请求 404，引号、撇号退回中文字体变成全角，只能重启 dev。
+// 所以原地覆盖，最后只删不再生成的旧文件。
 await mkdir(fontDir, { recursive: true });
 
-// 中文字体不写 unicode-range：英文字体不显示的字都落到它上面，每页都会用到
-const latin = await subset(LATIN, used.filter(isLatin), true);
-const cjk = await subset(CJK, used, false);
-await writeFile(cssOut, `/* 由 scripts/build-fonts.mjs 生成，不要手改 */\n${latin.face}\n${cjk.face}\n`);
+const latin = await subset(
+  LATIN,
+  used.filter((cp) => isLatin(cp) || isPunct(cp)),
+);
+const italic = await subset(
+  LATIN_ITALIC,
+  used.filter((cp) => cp > 0x20 && cp <= 0x7e),
+);
+const cjk = await subset(CJK, used);
+const latinPunct = latin.hit.filter(isPunct);
+const faces = [
+  fontFace(LATIN.family, LATIN.out, latin.hit.filter(isLatin)),
+  // 空 range 会变成不限字符，所以没有标点字形就不写这一条
+  ...(latinPunct.length ? [fontFace(LATIN_PUNCT, LATIN.out, latinPunct)] : []),
+  fontFace(LATIN_ITALIC.family, LATIN_ITALIC.out, italic.hit, { style: 'italic', weight: LATIN_ITALIC.weight }),
+  // 中文字体不写 unicode-range：英文字体不显示的字都落到它上面，每页都会用到
+  fontFace(CJK.family, CJK.out),
+];
+await writeIfChanged(cssOut, `/* 由 scripts/build-fonts.mjs 生成，不要手改 */\n${faces.join('\n')}\n`);
+const outputs = new Set([LATIN.out, LATIN_ITALIC.out, CJK.out]);
+for (const name of await readdir(fontDir)) {
+  if (!outputs.has(name)) await rm(join(fontDir, name), { recursive: true, force: true });
+}
 
 const kb = (n) => `${(n / 1024).toFixed(1)} KB`;
 const missing = cjk.missing.filter((cp) => cp > 0x7e);
 console.log(
   `fonts: ${used.length} 个字符；Plus Jakarta Sans ${kb(latin.bytes)}` +
     (latin.missing.length ? `（缺 ${String.fromCodePoint(...latin.missing)}，由 Noto Sans SC 显示）` : '') +
+    `；Plus Jakarta Sans Italic ${kb(italic.bytes)}` +
     `；Noto Sans SC ${kb(cjk.bytes)}` +
     (missing.length ? `；两套字体都没有、会回落系统字体的字符：${String.fromCodePoint(...missing)}` : ''),
 );

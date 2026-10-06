@@ -1,5 +1,7 @@
 ---
 // 静音循环的短视频（代替 GIF）。滚出视口时暂停；开启减弱动效时默认不播放；右下角按钮可暂停 / 播放。
+import { langOf } from '../i18n';
+
 interface Props {
   src: string;
   /** 没播放时显示的画面 */
@@ -10,6 +12,7 @@ interface Props {
 }
 
 const { src, poster, label, width, height } = Astro.props;
+const pause = { zh: '暂停视频', en: 'Pause video' }[langOf(Astro)];
 ---
 
 <div class="loop-video" data-loop-video style={`max-width: ${width}px`}>
@@ -24,7 +27,7 @@ const { src, poster, label, width, height } = Astro.props;
     preload="none"
     aria-label={label}
   ></video>
-  <button class="loop-toggle" type="button" aria-pressed="false" aria-label="暂停视频" hidden>
+  <button class="loop-toggle" type="button" aria-pressed="false" aria-label={pause} hidden>
     <svg class="pause-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
       <path d="M4 2h3v12H4zm5 0h3v12H9z"></path>
     </svg>

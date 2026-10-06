@@ -1,0 +1,74 @@
+---
+title: Zhongdayuan
+subtitle: Case management and fund analysis
+period: 2024 — Present
+role: Solo developer, from requirements to maintenance
+stack: [Next.js, React, PostgreSQL, Node.js, Electron, Docker]
+summary: Built a 105-line script into a case management system for web and desktop.
+metrics:
+  - { value: "5", label: Registered software copyrights }
+  - { value: "60+", label: Releases }
+  - { value: "500", unit: MB, label: Statement file size per import }
+order: 2
+---
+
+import Figure from '../../../components/Figure.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
+import FifoBars from '../../../components/diagrams/FifoBars.astro';
+import traceTree from '../../../assets/projects/zhongdayuan/trace-tree.png';
+import traceFlow from '../../../assets/projects/zhongdayuan/trace-flow.png';
+
+## Background
+
+The client analyzes bank statements to trace where money goes. A case can involve dozens of accounts and tens of thousands to over a million transactions. Previously, staff marked transactions by hand in Excel. Tracing funds could take days, and changing the criteria meant starting over.
+
+I wrote a 105-line Node.js script to check whether first-in, first-out tracing could match the manual results. Once it worked, the scope grew to include more bank formats, case collaboration, working paper exports, and an offline version. The script became a case management system.
+
+<Figure caption="Main steps of fund tracing">
+  <Flow
+    label="Processing pipeline: import, clean, trace, export"
+    steps={[
+      { title: 'Import', note: 'Import bank statements and detect column headers' },
+      { title: 'Clean', note: 'Merge worksheets, remove duplicates, and standardize fields' },
+      { title: 'Trace', note: 'Trace funds through accounts in FIFO order', accent: true },
+      { title: 'Export', note: 'Fund trees, flow graphs, working papers, and evidence request lists' },
+    ]}
+  />
+</Figure>
+
+## What I did
+
+I handle requirements, design, development, deployment, and maintenance. The system has four main parts:
+
+- **Fund analysis:** Transaction filtering, fund tracing, fund trees, and flow graphs. Results can be exported as working papers and evidence request lists.
+- **Data cleaning:** Parses statement formats from multiple banks in China, merges and deduplicates worksheets, and handles Excel files of around 500 MB per import.
+- **Case management:** Case creation, progress tracking, reply workflows, and notifications. Access depends on user role, department hierarchy, and case participation. Every action is logged for audit.
+- **Licensing and distribution:** Offline licensing for the desktop version (issue, activate, unbind, deactivate) and release distribution.
+
+<Figure
+  src={traceTree}
+  alt="Fund tracing results in a tree view"
+  caption="Fund tree for the selected tracing target (all data is simulated)"
+/>
+
+<Figure
+  src={traceFlow}
+  alt="Fund flow graph"
+  caption="The same results shown in React Flow, with XML export"
+/>
+
+## Technical details
+
+**Tracing algorithm:** FIFO (first in, first out) matches each incoming transaction to later payments. BFS (breadth-first search) follows the funds through downstream accounts. Additional rules handle balances, full-amount transfers, and small transactions.
+
+<Figure>
+  <FifoBars />
+</Figure>
+
+**Header detection:** Banks use different statement headers. The system maps 99 Chinese header aliases to standard fields, such as transaction date, account number, and debit or credit, during import.
+
+**Large imports:** PostgreSQL stores transactions in monthly partitions. Streaming COPY imports 100000 rows per batch. Partition creation and COPY run in separate transactions to avoid lock conflicts.
+
+**Offline desktop version:** The Electron app bundles PostgreSQL 17 and needs no separate dependency installation. The installer was reduced from 269 MB to 129 MB. Ed25519 signatures allow license verification without an internet connection.
+
+**Unit tests:** Forty test files cover fund tracing and data cleaning, with over 93% coverage of core business logic.

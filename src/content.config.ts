@@ -3,8 +3,9 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 // 项目详情页。frontmatter 是标题区和指标，正文是 MDX（Markdown 加插图、示意图组件）。
+// 中文稿在根目录，英文稿在 en/ 子目录（id 带 en/ 前缀），按语言筛选见 src/projects.ts。
 const projects = defineCollection({
-  loader: glob({ base: './src/content/projects', pattern: '*.{md,mdx}' }),
+  loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
     title: z.string(),
     subtitle: z.string(),

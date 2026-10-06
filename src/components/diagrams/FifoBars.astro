@@ -1,14 +1,16 @@
 ---
 // 先进先出匹配示意。金额和日期是虚构的例子：上面一条是按时间排列的入账，
-// 下面一条是支出，每笔支出按颜色标出它消耗了哪几笔入账。
+// 下面一条是支出，每笔支出按颜色标出它消耗了哪几笔入账。日期只写几号，月份由文案补上。
+import { langOf } from '../../i18n';
+
 const INCOMING = [
-  { key: 'a', date: '3 月 1 日', amount: 300 },
-  { key: 'b', date: '3 月 2 日', amount: 500 },
-  { key: 'c', date: '3 月 4 日', amount: 200 },
+  { key: 'a', day: 1, amount: 300 },
+  { key: 'b', day: 2, amount: 500 },
+  { key: 'c', day: 4, amount: 200 },
 ];
 const OUTGOING = [
   {
-    date: '3 月 3 日',
+    day: 3,
     amount: 400,
     parts: [
       { key: 'a', amount: 300 },
@@ -16,7 +18,7 @@ const OUTGOING = [
     ],
   },
   {
-    date: '3 月 5 日',
+    day: 5,
     amount: 600,
     parts: [
       { key: 'b', amount: 400 },
@@ -24,28 +26,48 @@ const OUTGOING = [
     ],
   },
 ];
-const LABEL =
-  '先进先出匹配示意。入账：3 月 1 日 300，3 月 2 日 500，3 月 4 日 200。' +
-  '支出：3 月 3 日 400，来自 3 月 1 日的 300 和 3 月 2 日的 100；' +
-  '3 月 5 日 600，来自 3 月 2 日剩下的 400 和 3 月 4 日的 200。';
+const t = {
+  zh: {
+    incoming: '入账',
+    outgoing: '支出',
+    date: (day: number) => `3 月 ${day} 日`,
+    spent: (day: number, amount: number) => `3 月 ${day} 日支出 ${amount}`,
+    legend: '颜色表示入账和支出的 FIFO 对应关系。',
+    label:
+      '先进先出匹配示意。入账：3 月 1 日 300，3 月 2 日 500，3 月 4 日 200。' +
+      '支出：3 月 3 日 400，来自 3 月 1 日的 300 和 3 月 2 日的 100；' +
+      '3 月 5 日 600，来自 3 月 2 日剩下的 400 和 3 月 4 日的 200。',
+  },
+  en: {
+    incoming: 'In',
+    outgoing: 'Out',
+    date: (day: number) => `Mar ${day}`,
+    spent: (day: number, amount: number) => `Mar ${day}, out ${amount}`,
+    legend: 'Colors match outgoing payments to incoming funds in FIFO order.',
+    label:
+      'First in, first out matching. In: 300 on Mar 1, 500 on Mar 2, 200 on Mar 4. ' +
+      'Out: 400 on Mar 3, taken from the 300 of Mar 1 and 100 of Mar 2. ' +
+      'On Mar 5, 600 is taken from the remaining 400 of Mar 2 and the 200 of Mar 4.',
+  },
+}[langOf(Astro)];
 ---
 
-<div class="fifo" role="img" aria-label={LABEL}>
+<div class="fifo" role="img" aria-label={t.label}>
   <div class="row">
-    <span class="row-label">入账</span>
+    <span class="row-label">{t.incoming}</span>
     <div class="bar">
       {INCOMING.map((item) => (
         <div class="group" style={`flex: ${item.amount} 1 0`}>
           <div class="segs">
             <div class:list={['seg', `seg-${item.key}`]}>{item.amount}</div>
           </div>
-          <span class="group-label">{item.date}</span>
+          <span class="group-label">{t.date(item.day)}</span>
         </div>
       ))}
     </div>
   </div>
   <div class="row">
-    <span class="row-label">支出</span>
+    <span class="row-label">{t.outgoing}</span>
     <div class="bar">
       {OUTGOING.map((item) => (
         <div class="group" style={`flex: ${item.amount} 1 0`}>
@@ -56,14 +78,12 @@ const LABEL =
               </div>
             ))}
           </div>
-          <span class="group-label">
-            {item.date}支出 {item.amount}
-          </span>
+          <span class="group-label">{t.spent(item.day, item.amount)}</span>
         </div>
       ))}
     </div>
   </div>
-  <p class="legend">颜色表示入账和支出的 FIFO 对应关系。</p>
+  <p class="legend">{t.legend}</p>
 </div>
 
 <style>

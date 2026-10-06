@@ -1,5 +1,6 @@
 ---
 import Tag from './Tag.astro';
+import { langOf } from '../i18n';
 
 // 详情页的标题区：项目名、副标题、导语，以及时间 / 角色 / 技术栈三项元信息。
 interface Props {
@@ -12,6 +13,10 @@ interface Props {
 }
 
 const { title, subtitle, summary, period, role, stack } = Astro.props;
+const t = {
+  zh: { period: '时间', role: '角色', stack: '技术栈' },
+  en: { period: 'Period', role: 'Role', stack: 'Stack' },
+}[langOf(Astro)];
 ---
 
 <header class="intro">
@@ -22,15 +27,15 @@ const { title, subtitle, summary, period, role, stack } = Astro.props;
   </div>
   <dl class="meta">
     <div>
-      <dt>时间</dt>
+      <dt>{t.period}</dt>
       <dd>{period}</dd>
     </div>
     <div>
-      <dt>角色</dt>
+      <dt>{t.role}</dt>
       <dd>{role}</dd>
     </div>
     <div class="meta-stack">
-      <dt>技术栈</dt>
+      <dt>{t.stack}</dt>
       <dd class="stack">
         {stack.map((item) => (
           <Tag>{item}</Tag>

@@ -1,36 +1,70 @@
+---
+import { langOf } from '../i18n';
+
+const t = {
+  zh: {
+    title: ['紙上得來終覺淺，'],
+    description:
+      '最擅长 Web 全栈，也做桌面端和移动端，还为企业搭建自动化流程。喜欢先弄明白问题，再把它做成好用的产品。',
+    cta: '看看我的作品',
+    canvas: '整理色块：鼠标经过或点击整理附近黄色方块',
+    hint: '试着动一动',
+    scattered: '已重新打散。移动鼠标或点击，整理附近的黄色方块。',
+    partial: '这一片已经理清楚了。可以继续整理其他位置。',
+    done: '黄色方块已全部整理完成。',
+  },
+  en: {
+    // 三句轮播，见下面的 .rotate
+    title: ['I hear, I know.', 'I see, I remember.', 'I do, I understand.'],
+    description:
+      'I specialize in full-stack web development, with experience in desktop and mobile apps and business automation. My approach is to understand the problem first, then build a product that is easy to use.',
+    cta: 'See my work',
+    canvas: 'Move the pointer or click to align nearby yellow blocks',
+    hint: 'Move the pointer',
+    scattered: 'Blocks scattered. Move the pointer or click to align them.',
+    partial: 'This area is aligned. Try another area.',
+    done: 'All yellow blocks are aligned.',
+  },
+}[langOf(Astro)];
+---
+
 <section class="hero" aria-labelledby="hero-title">
   <div class="copy">
-    <h1 id="hero-title">
-      <span class="line">紙上得來終覺淺，</span>
+    <h1 id="hero-title" class:list={{ rotate: t.title.length > 1 }}>
+      {t.title.map((line, i) => (
+        <span class="line" style={`--i: ${i}`}>
+          {line}
+        </span>
+      ))}
     </h1>
-    <p class="description">
-      最擅长 Web 全栈，也做桌面端和移动端，还为企业搭建自动化流程。喜欢先弄明白问题，再把它做成好用的产品。
-    </p>
+    <p class="description">{t.description}</p>
     <div class="actions">
       <a class="primary" href="#projects">
-        看看我的作品
+        {t.cta}
       </a>
     </div>
   </div>
 
   <div class="playground" data-field>
     <div class="canvas-wrap">
-      <canvas
-        tabindex="0"
-        role="button"
-        aria-label="整理色块：鼠标经过或点击整理附近黄色方块"
-        aria-describedby="play-hint"
-      ></canvas>
+      <canvas tabindex="0" role="button" aria-label={t.canvas} aria-describedby="play-hint"></canvas>
       <noscript>
         <div class="art-fallback" aria-hidden="true"></div>
       </noscript>
     </div>
     <div class="play-foot">
       <p class="hint" id="play-hint">
-        试着动一动
+        {t.hint}
       </p>
     </div>
-    <p class="sr-only" aria-live="polite" data-status></p>
+    <p
+      class="sr-only"
+      aria-live="polite"
+      data-status
+      data-msg-scattered={t.scattered}
+      data-msg-partial={t.partial}
+      data-msg-done={t.done}
+    ></p>
   </div>
 </section>
 
@@ -64,6 +98,41 @@
   }
   .line {
     display: block;
+  }
+  /*
+   * 英文标题三句轮播：三句叠在同一格里，高度取最高的一句，切换时下面的内容不跳。
+   * 三句一轮 10 秒，一句占 10/3 秒：淡入 1 秒、完整显示 1.3 秒、淡出 1 秒。一轮取 10 秒是为了关键帧都是整数：
+   * 10% = 1 秒淡入完，23% = 2.3 秒开始淡出，33% = 3.3 秒淡出完，离下一句开始还有 0.03 秒。
+   * 关键帧按三句写死，改句数要一起改。第一句延迟 -1 秒（10% 处），打开页面时已经完整显示。
+   * 开启减弱动效时 global.css 关掉动画，只显示第一句。读屏软件按顺序读出三句。
+   */
+  .rotate {
+    display: grid;
+    font-family: 'Plus Jakarta Sans Italic', var(--font-sans);
+    font-style: italic;
+  }
+  .rotate .line {
+    grid-area: 1 / 1;
+    opacity: 0;
+    animation: hero-line 10s calc(var(--i) * 10s / 3 - 1s) infinite both;
+  }
+  .rotate .line:first-child {
+    opacity: 1;
+  }
+  @keyframes hero-line {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    23% {
+      opacity: 1;
+    }
+    33%,
+    100% {
+      opacity: 0;
+    }
   }
   .description {
     font-size: 16px;
@@ -208,6 +277,9 @@
     .playground,
     .actions {
       display: none;
+    }
+    .rotate .line {
+      animation: none;
     }
     .hero {
       display: block;

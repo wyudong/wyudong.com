@@ -1,45 +1,14 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
-import { getCollection, getEntry, render } from 'astro:content';
-import Base from '../layouts/Base.astro';
-import ProjectIntro from '../components/ProjectIntro.astro';
-import MetricGroup from '../components/MetricGroup.astro';
-import NextProject from '../components/NextProject.astro';
-import '../styles/article.css';
+import ProjectPage from '../components/ProjectPage.astro';
+import { projectPaths } from '../projects';
 
 // 每个项目一页：/fydeos/、/zhong-da-yuan/、/merryking/、/soundlinks/，内容在 src/content/projects/*.mdx
-export const getStaticPaths = (async () => {
-  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-  return projects.map((entry, i) => ({
-    params: { project: entry.id },
-    props: { entry, next: projects[(i + 1) % projects.length] },
-  }));
-}) satisfies GetStaticPaths;
+export const getStaticPaths = (() => projectPaths('zh')) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { entry, next: nextByOrder }: Props = Astro.props;
-const next = (entry.data.next && (await getEntry(entry.data.next))) || nextByOrder;
-const { Content } = await render(entry);
-
-const { title, subtitle, period, role, stack, summary, ogDescription, metrics } = entry.data;
+const { entry, next }: Props = Astro.props;
 ---
 
-<Base
-  title={`${title} · ${subtitle} — Wang Yudong`}
-  ogTitle={`${title} · ${subtitle}`}
-  description={ogDescription ?? summary}
-  ogType="article"
->
-  {/* 页面顺序：标题区 → 关键数字 → 正文 */}
-  <ProjectIntro title={title} subtitle={subtitle} summary={summary} period={period} role={role} stack={stack} />
-  <MetricGroup metrics={metrics} />
-
-  <article class="project">
-    <div class="article">
-      <Content />
-    </div>
-  </article>
-
-  <NextProject project={next} />
-</Base>
+<ProjectPage entry={entry} next={next} />

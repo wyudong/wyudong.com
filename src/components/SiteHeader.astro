@@ -1,10 +1,30 @@
+---
+import { LANGS, langOf, localePath, switchPath, ui } from '../i18n';
+
+const lang = langOf(Astro);
+const other = lang === 'zh' ? 'en' : 'zh';
+const t = ui[lang];
+---
+
 <header class="site-header">
-  <a class="brand" href="/" aria-label="返回首页">
+  <a class="brand" href={localePath(lang, '/')} aria-label={t.home}>
     <span class="brand-mark" aria-hidden="true"></span>
   </a>
-  <a class="contact" href="mailto:hi@wyudong.com">
-    打个招呼<span aria-hidden="true">👋</span>
-  </a>
+  <div class="actions">
+    {/* 切到另一种语言的同一页 */}
+    <a
+      class="lang-switch"
+      href={switchPath(Astro.url.pathname, other)}
+      hreflang={LANGS[other].htmlLang}
+      lang={LANGS[other].htmlLang}
+    >
+      {t.switchTo}
+    </a>
+    <a class="contact" href="mailto:hi@wyudong.com">
+      {t.hello}
+      <span class="wave" aria-hidden="true">👋</span>
+    </a>
+  </div>
 </header>
 
 <style>
@@ -27,6 +47,24 @@
     border-radius: 10px;
     transform: rotate(-10deg);
   }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* 语言切换：和旁边按钮一样高（透明边框占位），不画边框，hover 变黄 */
+  .lang-switch {
+    -webkit-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    border-radius: 50px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  .lang-switch:hover {
+    background: var(--color-yellow);
+  }
   .contact {
     /* 按钮文字不参与选中 */
     -webkit-user-select: none;
@@ -43,12 +81,53 @@
   .contact:hover {
     background: var(--color-yellow);
   }
+  /* hover 时 👋 绕手腕摆两下，像招手 */
+  .wave {
+    display: inline-block;
+    transform-origin: 70% 70%;
+  }
+  .contact:hover .wave {
+    animation: wave 1s ease-in-out;
+  }
+  @keyframes wave {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    15% {
+      transform: rotate(14deg);
+    }
+    30% {
+      transform: rotate(-8deg);
+    }
+    45% {
+      transform: rotate(14deg);
+    }
+    60% {
+      transform: rotate(-4deg);
+    }
+    75% {
+      transform: rotate(6deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .contact:hover .wave {
+      animation: none;
+    }
+  }
 
   @media (width < 810px) {
     .brand-mark {
       width: 30px;
       height: 30px;
       border-radius: 9px;
+    }
+    .actions {
+      gap: 2px;
+    }
+    .lang-switch {
+      padding: 10px 12px;
+      font-size: 13px;
     }
     .contact {
       padding: 10px 15px;
@@ -60,7 +139,7 @@
     }
   }
   @media print {
-    .contact {
+    .actions {
       display: none;
     }
   }

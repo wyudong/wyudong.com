@@ -2,18 +2,24 @@
 import { Image } from 'astro:assets';
 import BrowserMock from '../BrowserMock.astro';
 import traceFlow from '../../assets/projects/zhongdayuan/trace-flow.png';
+import { langOf } from '../../i18n';
+
+const t = {
+  zh: { window: '中达源案件管理系统', alt: '中达源案件管理系统的资金流向图界面' },
+  en: { window: 'Zhongdayuan Case Management', alt: 'Fund flow graph in the Zhongdayuan case management system' },
+}[langOf(Astro)];
 ---
 
 <div class="project-cover cover-zdy">
   <div class="stage">
     <div class="zdy-window">
-      <BrowserMock title="中达源案件管理系统">
+      <BrowserMock title={t.window}>
         <Image
           src={traceFlow}
           widths={[560, 900, 1400, 2000, 2700]}
           sizes="(min-width: 1440px) 751px, (min-width: 1200px) 614px, (min-width: 810px) 433px, calc((100vw - 32px) * 0.91)"
           loading="lazy"
-          alt="中达源案件管理系统的资金流向图界面"
+          alt={t.alt}
         />
       </BrowserMock>
     </div>

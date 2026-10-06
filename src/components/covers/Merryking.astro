@@ -4,11 +4,33 @@ import WorldWww from '../../assets/projects/merryking/world-www.svg';
 import Lark from '../../assets/projects/merryking/new-lark.svg';
 import Alibaba from '../../assets/projects/merryking/alibabadotcom.svg';
 import GoogleAds from '../../assets/projects/merryking/googleads.svg';
+import { langOf } from '../../i18n';
+
+const t = {
+  zh: {
+    map: '自动化工具位于中心，连接电商独立站、Google Ads、飞书机器人和阿里国际站',
+    hub: '自动化工具',
+    web: '电商独立站',
+    feishu: '飞书机器人',
+    alibaba: '阿里国际站',
+    pause: '暂停项目动画',
+    play: '播放项目动画',
+  },
+  en: {
+    map: 'Automation tools connecting the website, Google Ads, a Feishu bot, and Alibaba.com',
+    hub: 'Automation',
+    web: 'Website',
+    feishu: 'Feishu Bot',
+    alibaba: 'Alibaba.com',
+    pause: 'Pause project animation',
+    play: 'Play project animation',
+  },
+}[langOf(Astro)];
 ---
 
 <div class="project-cover cover-mk" data-hub-flow>
   <div class="stage">
-    <div class="hub-map" role="img" aria-label="自动化工具位于中心，连接电商独立站、Google Ads、飞书机器人和阿里国际站">
+    <div class="hub-map" role="img" aria-label={t.map}>
       <svg class="hub-lines" viewBox="0 0 300 280" preserveAspectRatio="none" aria-hidden="true">
         <path d="M150 140 55 45M150 140 245 45M150 140 55 235M150 140 245 235"></path>
       </svg>
@@ -37,11 +59,11 @@ import GoogleAds from '../../assets/projects/merryking/googleads.svg';
       </svg>
       <div class="hub-node hub-center">
         <Bolt aria-hidden="true" />
-        <span>自动化工具</span>
+        <span>{t.hub}</span>
       </div>
       <div class="hub-node hub-web">
         <WorldWww aria-hidden="true" />
-        <span>电商独立站</span>
+        <span>{t.web}</span>
       </div>
       <div class="hub-node hub-ads">
         <GoogleAds aria-hidden="true" />
@@ -49,15 +71,23 @@ import GoogleAds from '../../assets/projects/merryking/googleads.svg';
       </div>
       <div class="hub-node hub-feishu">
         <Lark aria-hidden="true" />
-        <span>飞书机器人</span>
+        <span>{t.feishu}</span>
       </div>
       <div class="hub-node hub-alibaba">
         <Alibaba aria-hidden="true" />
-        <span>阿里国际站</span>
+        <span>{t.alibaba}</span>
       </div>
     </div>
   </div>
-  <button class="cover-motion" type="button" aria-pressed="false" aria-label="暂停项目动画" hidden>
+  <button
+    class="cover-motion"
+    type="button"
+    aria-pressed="false"
+    aria-label={t.pause}
+    data-label-pause={t.pause}
+    data-label-play={t.play}
+    hidden
+  >
     <svg class="pause-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
       <path d="M4 2h3v12H4zm5 0h3v12H9z"></path>
     </svg>

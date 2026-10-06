@@ -1,5 +1,5 @@
 // Merryking 封面的信号动画：两个请求从网站进入自动化工具，处理后分别送往飞书、Google Ads 和阿里国际站。
-// 时间轴照样稿 merryking-flow-v2.js（30fps，120 帧一个循环），用 Web Animations API 实现，不依赖 Lottie。
+// 时间轴按 30fps 计，120 帧（4 秒）一个循环，用 Web Animations API 实现，不依赖 Lottie。
 
 type Point = [number, number];
 
@@ -98,7 +98,8 @@ export function initHubFlow(root: HTMLElement): void {
 
   const sync = () => {
     button.setAttribute('aria-pressed', String(paused));
-    button.setAttribute('aria-label', paused ? '播放项目动画' : '暂停项目动画');
+    // 文案按页面语言写在 Merryking.astro 按钮的 data-label-* 上
+    button.setAttribute('aria-label', (paused ? button.dataset.labelPlay : button.dataset.labelPause) ?? '');
     const running = visible && !paused && !document.hidden;
     for (const animation of animations) {
       if (running) animation.play();

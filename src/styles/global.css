@@ -1,6 +1,6 @@
 /*
  * Tailwind 只引入 theme 和 utilities 两层，不引入 preflight：
- * 样稿很多地方没写行高，依赖浏览器默认的 normal，preflight 会统一改成 1.5。
+ * 很多地方没写行高，依赖浏览器默认的 normal，preflight 会统一改成 1.5。
  */
 @layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
@@ -43,6 +43,10 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+  /* 英文页：撇号、引号、破折号、省略号用英文字体显示，见 scripts/build-fonts.mjs */
+  body:lang(en) {
+    font-family: 'Plus Jakarta Sans Punct', var(--font-sans);
+  }
   a,
   button {
     -webkit-tap-highlight-color: transparent;
@@ -69,7 +73,7 @@
 }
 
 @layer components {
-  /* 版心按断点跳档（参照 bradleyziffer.com 实测）：手机满宽减 32，之后 714 / 1008 / 1248 */
+  /* 版心按断点跳档：手机满宽减 32，之后 714 / 1008 / 1248 */
   .shell {
     width: calc(100% - 32px);
     margin-inline: auto;

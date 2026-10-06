@@ -1,24 +1,50 @@
 ---
 // FydeOS 后端重构示意：账号、同步两个 Node.js 服务用 Go 重写，加上企业管理后端，经 APISIX 网关和 gRPC 统一接口。
+import { langOf } from '../../i18n';
+
+const t = {
+  zh: {
+    before: '重构前 · 各自对外的独立服务',
+    after: '重构后 · 网关统一入口',
+    gateway: 'Apache APISIX 网关',
+    account: '账号服务',
+    sync: '同步服务',
+    admin: '企业管理后端',
+    rewritten: 'Go 重写',
+    label:
+      '重构前：账号服务和同步服务是两个独立的 Node.js 服务。' +
+      '重构后：账号服务和同步服务用 Go 重写，三个服务统一用 gRPC 定义接口，由 APISIX 网关统一对外。',
+  },
+  en: {
+    before: 'Before · separate public APIs',
+    after: 'After · one API gateway',
+    gateway: 'Apache APISIX gateway',
+    account: 'Account service',
+    sync: 'Sync service',
+    admin: 'Enterprise admin backend',
+    rewritten: 'Rewritten in Go',
+    label:
+      'Before: the account and sync services were two separate Node.js services. ' +
+      'After: both were rewritten in Go, all three use gRPC interfaces behind a single APISIX gateway.',
+  },
+}[langOf(Astro)];
+
 const BEFORE = [
-  { name: '账号服务', tech: 'Node.js' },
-  { name: '同步服务', tech: 'Node.js' },
-  { name: '企业管理后端', tech: 'Go' },
+  { name: t.account, tech: 'Node.js' },
+  { name: t.sync, tech: 'Node.js' },
+  { name: t.admin, tech: 'Go' },
 ];
 const AFTER = [
-  { name: '账号服务', tech: 'Go 重写' },
-  { name: '同步服务', tech: 'Go 重写' },
-  { name: '企业管理后端', tech: 'Go' },
+  { name: t.account, tech: t.rewritten },
+  { name: t.sync, tech: t.rewritten },
+  { name: t.admin, tech: 'Go' },
 ];
-const LABEL =
-  '重构前：账号服务和同步服务是两个独立的 Node.js 服务。' +
-  '重构后：账号服务和同步服务用 Go 重写，三个服务统一用 gRPC 定义接口，由 APISIX 网关统一对外。';
 ---
 
 <div class="refactor-wrap">
-  <div class="refactor" role="img" aria-label={LABEL}>
+  <div class="refactor" role="img" aria-label={t.label}>
     <div class="side">
-      <span class="side-label">重构前 · 各自对外的独立服务</span>
+      <span class="side-label">{t.before}</span>
       <div class="services">
         {BEFORE.map((svc) => (
           <div class="svc">
@@ -30,9 +56,9 @@ const LABEL =
     </div>
     <span class="arrow" aria-hidden="true"></span>
     <div class="side">
-      <span class="side-label">重构后 · 网关统一入口</span>
+      <span class="side-label">{t.after}</span>
       <div class="one">
-        <span class="gateway">Apache APISIX 网关</span>
+        <span class="gateway">{t.gateway}</span>
         <span class="link">gRPC</span>
         <div class="modules">
           {AFTER.map((svc) => (

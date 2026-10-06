@@ -1,8 +1,8 @@
 # wyudong.com · 站点说明
 
-Astro 7 静态站，只有中文，不用 UI 框架。本文是站点唯一的现行文档，记录当前实现、约定和取舍，和代码一起维护。
+Astro 7 静态站，中英双语，不用 UI 框架。本文是站点唯一的现行文档，记录当前实现、约定和取舍，和代码一起维护。
 
-核对日期：2026-10-05。
+核对日期：2026-10-06。
 
 ## 页面
 
@@ -10,8 +10,21 @@ Astro 7 静态站，只有中文，不用 UI 框架。本文是站点唯一的�
 |---|---|
 | `/` | `src/pages/index.astro`：首屏 + 四张项目封面 |
 | `/fydeos/` `/zhong-da-yuan/` `/merryking/` `/soundlinks/` | `src/pages/[project].astro`，内容在 `src/content/projects/<id>.mdx` |
+| `/en/` | `src/pages/en/index.astro`，英文首页 |
+| `/en/fydeos/` 等 | `src/pages/en/[project].astro`，内容在 `src/content/projects/en/<id>.mdx` |
 
-地址取自内容文件名，改文件名就改地址。输出 `dist/<id>/index.html`，站内链接带尾部斜杠。新增项目要改两处：新建 `.mdx`，在 `ProjectMosaic.astro` 里加一张卡和它的封面组件。
+地址取自内容文件名，改文件名就改地址。输出 `dist/<id>/index.html` 和 `dist/en/<id>/index.html`，站内链接带尾部斜杠。新增项目要改三处：新建中文 `.mdx`，在 `en/` 下新建同名英文 `.mdx`，在 `ProjectMosaic.astro` 里加一张卡和它的封面组件。
+
+## 双语
+
+- 中文在根路径，英文在 `/en/` 下，两边页面一一对应，共 10 页。`astro.config.mjs` 用 Astro 自带的 i18n（`defaultLocale: 'zh'`，`prefixDefaultLocale: false`），组件里用 `langOf(Astro)` 判断语言，MDX 里渲染的示意图组件也一样。不按浏览器语言自动跳转。
+- `src/i18n.ts`：语言列表（`html lang`、`og:locale`、路径前缀）、`localePath`（加前缀）、`switchPath`（`/x/` ↔ `/en/x/`），以及多个组件共用的文案（跳过链接、品牌标的“返回首页”、打招呼、切换按钮）。
+- 只在一个组件里用到的文案写在那个组件顶部：`const t = { zh: {...}, en: {...} }[langOf(Astro)]`。
+- 客户端脚本不写文案：`field.ts` 的播报从 `data-msg-*` 读，`hub-flow.ts` 的按钮名称从 `data-label-*` 读，文案由组件按语言写进去。
+- `src/projects.ts`：`projectsFor(lang)` 按语言取项目并按 `order` 排序，`slugOf` 去掉 `en/` 前缀，`projectPaths(lang)` 是两种语言 `getStaticPaths` 共用的。详情页主体在 `components/ProjectPage.astro`。
+- `<head>` 里两种语言互相写 `hreflang` alternate，`x-default` 指向中文；`og:locale` 和 `og:locale:alternate` 跟着语言走。
+- 英文文案的写法跟中文一致：短句、不用营销形容词、数字前置、数字不加千分位、中达源不提客户行业。中文量词单位在英文里并进 label（`158` + Product listings generated），MB 保留为单位。英文首页标题是三句轮播，见“首屏”。
+- 列表项开头的加粗小标题：英文冒号一起加粗（`**Label:**`，带链接的写 `**[Label](url):**`，冒号不进链接），中文冒号不加粗（`**标签**：`）。
 
 ## 命令
 
@@ -28,7 +41,7 @@ Astro 7 静态站，只有中文，不用 UI 框架。本文是站点唯一的�
 
 ```
 site/
-├── astro.config.mjs        # site、MDX、Markdown 处理器（外链新标签页）、代码高亮主题、字体文件不内联
+├── astro.config.mjs        # site、i18n、MDX、Markdown 处理器（外链新标签页）、代码高亮主题、字体文件不内联
 ├── pnpm-workspace.yaml     # 放行 esbuild 的安装脚本
 ├── .prettierrc / .prettierignore
 ├── scripts/build-fonts.mjs # 字体裁剪
@@ -36,15 +49,17 @@ site/
 ├── docs/
 └── src/
     ├── content.config.ts   # projects 集合的字段
-    ├── content/projects/   # 四篇 MDX：frontmatter + 正文
-    ├── pages/              # index.astro、[project].astro
+    ├── content/projects/   # 四篇中文 MDX：frontmatter + 正文；en/ 下是四篇英文
+    ├── i18n.ts             # 语言、路径前缀、共用文案
+    ├── projects.ts         # 按语言取项目、getStaticPaths
+    ├── pages/              # index.astro、[project].astro；en/ 下是英文的同名两页
     ├── layouts/Base.astro  # head、顶栏、<main class="shell">、页脚
     ├── styles/             # global.css（token、版心）、article.css（正文）、fonts.generated.css（生成物）
     ├── scripts/            # field.ts（首屏方块）、hub-flow.ts（Merryking 动画）
     ├── components/
     │   ├── SiteHeader · Footer · Hero · ProjectMosaic · BrowserMock
     │   ├── covers/         # Fydeos · Zhongdayuan · Merryking · Soundlinks，首页卡片封面
-    │   ├── ProjectIntro · MetricGroup · NextProject · Tag                   # 详情页骨架
+    │   ├── ProjectPage · ProjectIntro · MetricGroup · NextProject · Tag     # 详情页骨架
     │   ├── Figure · LoopVideo                                               # 正文插图、静音循环视频
     │   └── diagrams/       # Flow · FifoBars · Refactor，正文里的示意图（HTML，不是 SVG 文件）
     └── assets/
@@ -55,9 +70,10 @@ site/
 ## 约定
 
 **命名与文案**
-- 全站不出现中文全名。首页网页标题 `Wang Yudong`，描述 `全栈工程师`。详情页标题 `项目名 · 副标题 — Wang Yudong`，og:title 不带后半段。
-- 文案以 `src/content/projects/*.mdx` 和 `Hero.astro` 为准，会持续改，文档里不重复。写法：短句、不用营销形容词、数字前置、第一人称不出现姓名、承认代价。
+- 全站不出现中文全名。首页网页标题 `Wang Yudong`，描述 `全栈工程师`（英文 `A full-stack engineer`）。详情页标题 `项目名 · 副标题 — Wang Yudong`，og:title 不带后半段。
+- 文案以 `src/content/projects/*.mdx`、`src/content/projects/en/*.mdx` 和 `Hero.astro` 为准，会持续改，文档里不重复。写法：短句、不用营销形容词、数字前置、第一人称不出现姓名、承认代价。
 - 数字不加千分位逗号：写 1301，不写 1,301。
+- 图注（`Figure` 的 `caption`）当标题用，末尾不加句号，中英文一样，中间有逗号、冒号也不加。图里的说明文字是完整句子的（如 `FifoBars` 的图例），保留句号。一条图注要写两句以上时，改短，或把解释挪进正文。
 - 中达源只说案件管理与资金分析，不提客户行业。
 
 **隐私**
@@ -88,19 +104,22 @@ site/
 
 **顶栏** `SiteHeader`
 - 左边是黄色方块标，链回首页，没有文字；favicon 是同一个方块。
-- 右边按钮 `打个招呼👋`，链到 `mailto:hi@wyudong.com`，hover 变黄，手机端隐藏 emoji。👋 两套字体里都没有，用系统 emoji 字体显示。
+- 右边按钮 `打个招呼👋`（英文 `Say hi👋`），链到 `mailto:hi@wyudong.com`，hover 变黄、👋 摆两下（开启减弱动效时不摆），手机端隐藏 emoji。👋 两套字体里都没有，用系统 emoji 字体显示。
+- 打招呼按钮左边是语言切换：中文页显示 `English`，英文页显示 `中文`，链到另一种语言的同一页，带 `hreflang` 和 `lang`。无边框（透明边框占位，和旁边按钮一样高），hover 变黄，手机端 13px，打印时和打招呼按钮一起隐藏。
 
 **首屏** `Hero` + `scripts/field.ts`
 - 左：h1、描述、按钮 `看看我的作品`（链到 `#projects`，不带箭头）。右：方块 canvas，右下角一行提示 `试着动一动`，手机端居中。没有问候行。
 - h1 字号跟版心跳档：60 / 52 / 42px，手机 `clamp(30px, 7.8vw, 54px)`。
-- 方块：种子 1907、黄块 9×9、灰块让到外圈、整理半径 2.35。鼠标经过或点击会整理附近的黄块，停止操作 1.5 秒后约 1 秒打散；Enter / 空格整理下一片。
-- 动画一直运行，只在页面不可见或滚出视口时暂停。开启减弱动效后直接归位。缩放窗口不重置状态；aria-live 播报；noscript 显示静态图。没有暂停和重新打散按钮。
+- 英文首页的 h1 是三句轮播：`I hear, I know.` → `I see, I remember.` → `I do, I understand.`，用斜体 Plus Jakarta Sans Italic。纯 CSS 动画：三句叠在同一个网格格子里（高度取最高的一句，切换时下面不跳），一轮 10 秒，一句占 10/3 秒：淡入 1 秒、完整显示 1.3 秒、淡出 1 秒，关键帧是整数 10% / 23% / 33%，句与句之间留 0.03 秒空白。关键帧按三句写死，改句数要一起改。打开页面时第一句已经完整显示；开启减弱动效后只显示第一句。读屏软件按顺序读出三句。中文首页标题不轮播。
+- 方块：每次打开页面随机取种子，初始排布每次不同；黄块 9×9、灰块让到外圈、整理半径 2.35。鼠标经过或点击会整理附近的黄块，停止操作 2.4 秒后约 1 秒打散，各块回到本次最初散落的位置附近；Enter / 空格整理下一片。
+- 全部归位后，等最后一块停稳（开始归位后 0.7 秒），一道白光从左上斜扫到右下，0.75 秒扫完，经过的黄块微微鼓起；光只画在黄块上。停手 2.4 秒才打散，闪光总能扫完。
+- 动画一直运行，只在页面不可见或滚出视口时暂停。开启减弱动效后直接归位，不闪光。缩放窗口不重置状态；aria-live 播报；noscript 显示静态图。没有暂停和重新打散按钮。
 
 **项目拼贴** `ProjectMosaic`
-- 区块头：黄色旋转小方块 + `做过的项目`。
+- 区块头：黄色旋转小方块 + `做过的项目`（英文 `Projects`）。
 - 两列：左 FydeOS、中达源，右 Merryking、Soundlinks。FydeOS `16/9`、中达源 `1.39189`、Merryking `1/0.96` 固定宽高比；Soundlinks 不设比例，用 `flex: 1` 撑满窄列，两列自然齐底。
 - 手机单列，按 DOM 顺序排，不用 `order`。比例：FydeOS `1/0.82`、中达源 `1.39189`、Merryking `1/0.96`、Soundlinks `1/1.4`。
-- **整卡链接**：每张卡里有一个铺满的透明链接，无障碍名称是 `项目名：副标题`。封面层叠在链接上面，但不接收指针，点击会穿到链接；封面里的按钮单独接收。不用 `<a>` 包住整张卡，因为 Merryking 封面里有按钮，交互元素不能嵌套。
+- **整卡链接**：每张卡里有一个铺满的透明链接，无障碍名称是 `项目名：副标题`（英文 `Title: Subtitle`）。封面层叠在链接上面，但不接收指针，点击会穿到链接；封面里的按钮单独接收。不用 `<a>` 包住整张卡，因为 Merryking 封面里有按钮，交互元素不能嵌套。
 - **hover 和键盘聚焦**：只缩小封面层（0.95）并盖一层浅色，外层不动，鼠标停在卡片边缘不会抖。焦点环画在外层，不会被封面的 `overflow: hidden` 裁掉。
 
 **封面**（`components/covers/`）
@@ -115,7 +134,7 @@ site/
 | Soundlinks | 一张 App 截图（听一听），铺满卡片、顶部对齐，不参与撑高 |
 
 **Merryking 信号动画** `scripts/hub-flow.ts`
-- 用 SVG 加 Web Animations API，按样稿 `merryking-flow-v2.js` 的时间轴重写，不用 Lottie，零依赖。
+- 用 SVG 加 Web Animations API 实现，不用 Lottie，零依赖。
 - 30fps、120 帧（4 秒）一个循环：两个输入点从网站到中心（第 6–33、14–41 帧），中心脉冲圈（34–53），三个输出点从中心到飞书（49–78）、Google Ads（53–82）、阿里国际站（57–86）。
 - 离开视口、标签页隐藏、开启减弱动效、点暂停按钮时停止。按钮 `z-index: 6`，盖在整卡链接上面。
 
@@ -129,7 +148,7 @@ site/
 | 飞书机器人 | IconPark `new-lark` | Apache-2.0 |
 | 阿里国际站 | Simple Icons `alibabadotcom` | CC0 |
 
-**页脚** `Footer`：上边一条线。左边 `© 2026 wyudong.com`，右边 `github ↗`，链到 https://github.com/wyudong，新标签页打开。12px 次要文字色，链接 hover 变深。
+**页脚** `Footer`：上边一条线。左边 `© 2026 wyudong.com`，右边 `github ↗`，链到 https://github.com/wyudong，新标签页打开。12px 次要文字色，链接 hover 变深。打印时隐藏。
 
 ## 详情页
 
@@ -139,12 +158,12 @@ site/
 顶栏
 ① 标题区     ProjectIntro   项目名 · 副标题 · 导语 ｜ 时间 / 角色 / 技术栈
 ② 关键数字   MetricGroup    3–4 个大数字，上边一条线
-③ 正文       MDX            项目背景 / 我做了什么 / 技术细节 / 结果与回顾，图文交替
+③ 正文       MDX            项目背景 / 我做了什么 / 技术细节（Soundlinks 多一节结果与回顾），图文交替
 ④ 下一个项目 NextProject    ← 全部项目 ｜ 下一个项目：xxx →
 页脚
 ```
 
-全部在 `<main class="shell">` 里，没有通栏元素。曾经有过放大封面的通栏 banner，已经连同组件和封面里的 banner 代码一起删掉。
+全部在 `<main class="shell">` 里，没有通栏元素。
 
 **① 标题区** `ProjectIntro`
 - 上边距 56 / 48 / 40 / 32px（四档）。
@@ -164,7 +183,7 @@ site/
 - 列表 marker 浅灰；加粗是 600 + 墨色。链接带 3px 黄色下划线，hover 浅黄底。正文里指向外站的链接在新标签页打开，由 `astro.config.mjs` 里的 satteri 插件加上 `target="_blank" rel="noopener"`。
 - 代码块用 Shiki 的 `github-light`，底色统一成 `#efefe9`，12px 圆角，等宽字体走系统栈，不加字体文件。
 - 两张并排放在 `<div class="pair">` 里，≥810 两列，间距 24。
-- `article.css` 只由 `[project].astro` 引入，不放进 `@layer`：站点没有 preflight，要显式盖掉浏览器默认边距（比如 `figure` 左右 40px），也要能压过组件的 scoped 样式。
+- `article.css` 只由 `ProjectPage.astro` 引入（中英详情页共用），不放进 `@layer`：站点没有 preflight，要显式盖掉浏览器默认边距（比如 `figure` 左右 40px），也要能压过组件的 scoped 样式。
 
 **④ 下一个项目** `NextProject`
 - 上边一条线。左边 `← 全部项目`，链到 `/#projects`。右边是标签"下一个项目"、32px / 600 的项目名（手机 24）和时间，hover 时箭头右移 4px。手机端上下排，下一个项目在上。
@@ -182,7 +201,7 @@ site/
 | `BrowserMock` | 带标题栏的窗口框，本身是名为 `mock` 的容器。边框、阴影、圆角、标题栏高度、字号、内边距、间距都是带默认值的 CSS 变量 |
 | `Tag` | 胶囊标签，现在只用在技术栈 |
 
-示意图都是 HTML 组件，文字跟随页面字体，窄屏自动竖排，用 `role="img"` 加 `aria-label` 给读屏软件。
+示意图都是 HTML 组件，文字跟随页面字体。`Flow`、`Refactor` 在容器变窄时竖排，`FifoBars` 手机上只缩小字号和内边距。读屏软件：`Flow` 是带 `aria-label` 的有序列表，逐步读出；`FifoBars`、`Refactor` 用 `role="img"` 加 `aria-label` 给出完整描述。
 
 **各页插图**
 
@@ -196,6 +215,7 @@ site/
 ## 写内容
 
 - 正文是 Markdown，插图和示意图用 `<Figure>` 包起来。MDX 文件顶部是 import，其余照常写。
+- 中文稿和英文稿分开写，改了一边要同步另一边。英文稿在 `en/` 子目录里，import 路径比中文稿多一层 `../`。`Flow` 的文字从 MDX 传入，两边各写各的；`FifoBars`、`Refactor` 的文字在组件里，按语言切换。
 - 改完文字后跑一次 `pnpm fonts`，新出现的字才会进字体子集。`pnpm dev` 只在启动时裁一次。新增内容文件或改了集合字段后，重启 `pnpm dev`。
 - MDX 文件不会被 Prettier 格式化，见"格式化"。
 - frontmatter 字段（`src/content.config.ts`）：
@@ -233,46 +253,47 @@ site/
 
 - 英文字母、数字和英文标点用 Plus Jakarta Sans，中文和其余字符用 Noto Sans SC。两套都只用 400 和 600 两种字重。
 - `scripts/build-fonts.mjs` 按全站实际用到的字符裁剪字体（扫描 `src` 下的 `.astro`、`.md(x)`、`.ts`、`.css`，补上 Markdown 渲染时生成的排版标点），每套只输出一个文件到 `src/assets/fonts/`，同时生成 `src/styles/fonts.generated.css`。两者都是生成物，已在 `.gitignore` 里。
+- 生成时不清空字体目录：内容没变的文件不写，变了的原地覆盖，最后只删不再生成的旧文件。dev 开着时字体文件哪怕只消失一下，dev server 就会一直当它不存在，英文页字体请求 404、引号和撇号退回中文字体变成全角，只能重启 dev。这样处理后，dev 开着时也可以跑 `pnpm build` / `pnpm fonts`。
 - 源字体是 Google Fonts 仓库里完整的可变字体，固定到某次提交并校验 sha256。第一次运行时下载（Noto Sans SC 约 17 MB），缓存在 `node_modules/.cache/fonts/`，之后不再联网。要换字体版本，改脚本里的地址和校验值。Fontsource 的包只有按 unicode-range 切好的分片，没法合成一个文件，所以不用。
+- 英文首页标题另用斜体 `plus-jakarta-sans-italic.woff2`，字体名 `Plus Jakarta Sans Italic`：只含可打印 ASCII，字重固定 600，只有英文首页用到，也只在那一页预加载（`src/pages/en/index.astro` 通过 `Base.astro` 的 `head` 插槽）。其他页面不会下载它。
 - `src/layouts/Base.astro` 在 `<head>` 里预加载这两个文件。打开任何一页都会马上下载全站字体，换页直接用缓存。`astro.config.mjs` 让 `.woff2` 不内联成 base64，否则会塞进每页的 CSS、挡住首屏渲染。
-- 空格、「·」「—」、中文引号、省略号留给 Noto Sans SC，不交给英文字体。这样全站行高不变，分隔点也保持原来的样子。
+- 空格、「·」「—」、中文引号、省略号留给 Noto Sans SC，不交给英文字体。CSS 用第一个包含空格的字体计算 `line-height: normal`，所以全站行高按中文字体算，分隔点也是中文字体的样子。
+- 英文页例外：smartypants 生成的 `‘’“”–—…` 在 Noto Sans SC 里是全角宽度（撇号和汉字一样宽），放在英文里很难看。这几个字的字形也裁进英文字体文件，另写一条 `@font-face`，字体名 `Plus Jakarta Sans Punct`，用同一个文件、unicode-range 只含这几个字；`global.css` 在 `body:lang(en)` 下把它排到最前面。中文页不用这个字体名，这几个字仍由 Noto Sans SC 显示。空格仍在 Noto Sans SC，所以英文页行高规则不变，也照样预加载两个字体文件。
 - 代码块的等宽字体走系统栈，不进字体子集。
 
 | 文件 | 大小 |
 |---|---|
 | `plus-jakarta-sans.woff2` | 16 KB |
 | `noto-sans-sc.woff2` | 206 KB |
+| `plus-jakarta-sans-italic.woff2` | 11 KB，只有英文首页 |
 
-每个页面都只下载这两个文件，共约 222 KB。之前按页面拆分时，首页是 16 个文件 109 KB，详情页是 34 到 39 个文件 183 到 191 KB。
+除英文首页多一个斜体文件外，每个页面都只下载这两个文件，共约 222 KB。
 
 ## 技术取舍
 
 1. **版本**：Astro 7.3.2、Tailwind 4.3、TypeScript 6。`@astrojs/check` 只接受 TS 5 或 6。Node 要求 ≥22.12（本机 22.20）。pnpm 11 默认不跑依赖的安装脚本，`pnpm-workspace.yaml` 里放行了 esbuild。图片处理需要 sharp，已在依赖里。
-2. **Tailwind 只引入 theme 和 utilities 两层，不引入 preflight**：样稿很多地方没写行高，依赖浏览器默认的 `normal`，preflight 会统一改成 1.5，按钮和标题的高度都会变。没有 preflight，所以正文要自己写一套重置（`article.css`）。组件样式都在 scoped `<style>` 里，scoped 样式会盖过 utility，同一个属性只用一种写法。
-3. **Markdown 处理器**是 `@astrojs/markdown-satteri`，MDX 默认继承它，外链新标签页的插件挂在它上面。
-4. **视觉来源**：定稿样稿是 `~/Desktop/résumé/homedesign-v2/项目封面构图样稿.zip`，按批注改过。样稿里的 650、550、500 字重都换算成 600。断点用 810 / 1200 / 1440，替代样稿的 760 / 1050 / 1600；版心不随视口连续变化，改成参照站的跳档。首屏行为以样稿代码为准，`directions.html` 里的"2 秒 / 6 秒"是旧描述。
-5. **head**：title、description、canonical、theme-color、favicon，og:title、description、type、url、locale。没有 og:image。
+2. **Tailwind 只引入 theme 和 utilities 两层，不引入 preflight**：很多地方没写行高，依赖浏览器默认的 `normal`，preflight 会统一改成 1.5，按钮和标题的高度都会变。没有 preflight，所以正文要自己写一套重置（`article.css`）。组件样式都在 scoped `<style>` 里，scoped 样式会盖过 utility，同一个属性只用一种写法。
+3. **Markdown 处理器**是 `@astrojs/markdown-satteri`，MDX 默认继承它，外链新标签页的插件挂在它上面。插件的类型来自 `satteri`，它作为开发依赖直接装在项目里，否则找不到类型声明。
+4. **head**：title、description、canonical、hreflang alternate（中、英、x-default）、theme-color、favicon，og:title、description、type、url、locale、locale:alternate。没有 og:image。
 
 ## 格式化
 
 - 规则：单引号、2 格缩进、一行最长 120 列，`.astro` 用 `prettier-plugin-astro`。
-- `.prettierignore` 跳过 `*.mdx`（Prettier 的 MDX 解析不认正文里的 `{/* */}` 注释和 frontmatter 里的内联对象）、`docs`、锁文件和 `favicon.svg`。`dist`、`.astro`、字体生成物已经在 `.gitignore` 里，Prettier 默认跳过。
+- `.prettierignore` 跳过 `*.mdx`（Prettier 的 MDX 解析不认正文里的 `{/* */}` 注释和 frontmatter 里的内联对象）、`docs` 和锁文件。`dist`、`.astro`、字体生成物已经在 `.gitignore` 里，Prettier 默认跳过。
 - Zed 保存时会按这个配置自动格式化。Zed 在这个项目里不会自己重新加载 `.prettierrc`，改了配置要完全退出 Zed（Cmd+Q）再打开，否则它还用旧配置。
 - 不想让 Zed 自动整理 Astro 文件，就在 Zed 设置里给 Astro 关掉 `format_on_save`。
 
 ## 验证
 
-**当前状态（2026-10-05）**
-- `pnpm build` 通过，五个页面。
-- `pnpm check` 0 错误。外链插件的类型来自 `satteri`，它要作为开发依赖直接装进项目，否则找不到类型声明。
-- 删掉 banner、换掉截图之后，下面的尺寸、交互和 Lighthouse 还没有重测。
-- 隐私：构建产物的文字里没有中文全名，没有 12 位以上的数字串，唯一的邮箱是 `hi@wyudong.com`。截图里的 `9999…` 是假账号。
+**最近一次（2026-10-06）**
+- 构建通过，十个页面（中英各五）。`pnpm check` 0 错误。`pnpm format:check` 只报 `SiteHeader.astro` 一处：Prettier 要把 👋 的 `<span>` 拆成三行，还没改。
+- 320 / 390 宽度下十个页面都没有横向滚动，切换按钮和打招呼按钮等高。切换按钮在详情页跳到另一种语言的同一页。Merryking 暂停按钮、首屏方块播报在英文页是英文。控制台没有报错。
+- 英文五页里的汉字只有切换按钮上的「中文」，另有 `<head>` 里两条中文 HTML 注释。
+- 英文页撇号宽 0.27em、弯引号 0.42em，都由 Plus Jakarta Sans 显示。dev 开着时重新生成字体，英文字体照常加载。
+- 首屏方块每次加载的初始排布都不同；全部归位后的闪光总在打散前扫完。
+- 隐私：构建产物里没有中文全名，没有 12 位以上的数字串，唯一的邮箱是 `hi@wyudong.com`。截图里的 `9999…` 是假账号。没有外部资源请求。
 
-**上次完整验证（2026-10-04）**
-
-`pnpm check` 0 错误，`pnpm format:check` 通过，五个页面都没有横向滚动。
-
-首页拼贴尺寸（脚本读盒子，和参照站实测一致）：
+首页拼贴尺寸（脚本读盒子）：
 
 | 视口 | FydeOS | 中达源 | Merryking | Soundlinks |
 |---|---|---|---|---|
@@ -280,6 +301,8 @@ site/
 | 1280 | 675×380 | 675×485 | 323×310 | 323×555 |
 | 1024 | 476×268 | 476×342 | 228×219 | 228×391 |
 | 390 | 358×294 | 358×257 | 358×344 | 358×501 |
+
+**交互和 Lighthouse（2026-10-04 测，之后没有重测）**
 
 交互：
 - Tab 能依次聚焦四张卡，焦点环在卡片外可见，Enter 进详情页。Merryking 暂停按钮在卡片上能点。skip link 落到 `#main`。
@@ -297,4 +320,4 @@ site/
 | 首页 · 桌面 | 100 | 100 | 100 | 100 |
 | FydeOS · 桌面 | 100 | 100 | 100 | 100 |
 
-累计布局偏移 0.001，没有外部请求。
+累计布局偏移 0.001。

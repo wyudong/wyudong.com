@@ -1,32 +1,40 @@
 ---
-import { getCollection } from 'astro:content';
 import Fydeos from './covers/Fydeos.astro';
 import Zhongdayuan from './covers/Zhongdayuan.astro';
 import Merryking from './covers/Merryking.astro';
 import Soundlinks from './covers/Soundlinks.astro';
+import { langOf, localePath } from '../i18n';
+import { projectsFor, slugOf } from '../projects';
 
-const projects = await getCollection('projects');
+const lang = langOf(Astro);
+const t = {
+  zh: { heading: '做过的项目', separator: '：' },
+  en: { heading: 'Projects', separator: ': ' },
+}[lang];
+
+const projects = await projectsFor(lang);
 // 整卡链接的名字：项目名 + 副标题
-const labelOf = (id: string) => {
-  const data = projects.find((p) => p.id === id)?.data;
-  return data ? `${data.title}：${data.subtitle}` : id;
+const labelOf = (slug: string) => {
+  const data = projects.find((p) => slugOf(p) === slug)?.data;
+  return data ? `${data.title}${t.separator}${data.subtitle}` : slug;
 };
+const hrefOf = (slug: string) => localePath(lang, `/${slug}/`);
 ---
 
 <section class="projects" id="projects" aria-labelledby="projects-title">
   <div class="section-head">
-    <h2 id="projects-title">做过的项目</h2>
+    <h2 id="projects-title">{t.heading}</h2>
   </div>
   <div class="project-list">
     <div class="col">
       <article class="project-item item-fy">
-        <a class="card-link" href="/fydeos/" aria-label={labelOf('fydeos')}></a>
+        <a class="card-link" href={hrefOf('fydeos')} aria-label={labelOf('fydeos')}></a>
         <div class="card">
           <Fydeos />
         </div>
       </article>
       <article class="project-item item-zdy">
-        <a class="card-link" href="/zhong-da-yuan/" aria-label={labelOf('zhong-da-yuan')}></a>
+        <a class="card-link" href={hrefOf('zhong-da-yuan')} aria-label={labelOf('zhong-da-yuan')}></a>
         <div class="card">
           <Zhongdayuan />
         </div>
@@ -34,13 +42,13 @@ const labelOf = (id: string) => {
     </div>
     <div class="col">
       <article class="project-item item-mk">
-        <a class="card-link" href="/merryking/" aria-label={labelOf('merryking')}></a>
+        <a class="card-link" href={hrefOf('merryking')} aria-label={labelOf('merryking')}></a>
         <div class="card">
           <Merryking />
         </div>
       </article>
       <article class="project-item item-sound">
-        <a class="card-link" href="/soundlinks/" aria-label={labelOf('soundlinks')}></a>
+        <a class="card-link" href={hrefOf('soundlinks')} aria-label={labelOf('soundlinks')}></a>
         <div class="card">
           <Soundlinks />
         </div>
@@ -77,7 +85,7 @@ const labelOf = (id: string) => {
   }
 
   /*
-   * 尺寸照参照站：三张卡固定宽高比，Soundlinks 不设比例、撑满窄列剩余高度，两列自然齐底。
+   * 三张卡固定宽高比，Soundlinks 不设比例、撑满窄列剩余高度，两列自然齐底。
    * 手机：单列，按 DOM 顺序 FydeOS → 中达源 → Merryking → Soundlinks，每张单独定比例。
    */
   .project-list {

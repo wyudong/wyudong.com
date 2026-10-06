@@ -1,15 +1,18 @@
 ---
 // 详情页的关键数字：大号数字 + 小号单位 + 说明。≥1200 一行排完，更窄时两列。
+import { langOf } from '../i18n';
+
 interface Props {
   metrics: { value: string; unit?: string; label: string }[];
 }
 
 const { metrics } = Astro.props;
+const heading = { zh: '关键数字', en: 'Key numbers' }[langOf(Astro)];
 ---
 
 <section class="metrics" aria-labelledby="metrics-title">
   <h2 id="metrics-title" class="sr-only">
-    关键数字
+    {heading}
   </h2>
   <ul style={`--cols: ${Math.min(metrics.length, 4)}`}>
     {metrics.map((metric) => (

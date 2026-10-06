@@ -1,20 +1,26 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { langOf, localePath } from '../i18n';
+import { slugOf, type Project } from '../projects';
 
 // 详情页底部：左边回到全部项目，右边是下一个项目的大链接。
 interface Props {
-  project: CollectionEntry<'projects'>;
+  project: Project;
 }
 
 const { project } = Astro.props;
+const lang = langOf(Astro);
+const t = {
+  zh: { nav: '项目导航', back: '全部项目', next: '下一个项目' },
+  en: { nav: 'Project navigation', back: 'All projects', next: 'Next project' },
+}[lang];
 ---
 
-<nav class="pager" aria-label="项目导航">
-  <a class="back" href="/#projects">
-    <span aria-hidden="true">←</span> 全部项目
+<nav class="pager" aria-label={t.nav}>
+  <a class="back" href={localePath(lang, '/#projects')}>
+    <span aria-hidden="true">←</span> {t.back}
   </a>
-  <a class="next" href={`/${project.id}/`}>
-    <span class="label">下一个项目</span>
+  <a class="next" href={localePath(lang, `/${slugOf(project)}/`)}>
+    <span class="label">{t.next}</span>
     <span class="name">
       {project.data.title}
       <span class="arrow" aria-hidden="true">

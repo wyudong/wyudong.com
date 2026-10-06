@@ -1,0 +1,55 @@
+---
+title: FydeOS
+subtitle: Cloud services and app ecosystem
+period: 2019 — 2023
+role: Full-stack developer (remote)
+stack: [Node.js, Go, MongoDB, PostgreSQL, React, WebRTC, Discourse, Docker, Grafana]
+summary: Cloud services, an app store, file sharing, and a community forum for over 10000 individual and enterprise users.
+metrics:
+  - { value: "1000+", label: Apps and extensions }
+  - { value: "-50%", label: Database query time }
+  - { value: "10k+", label: Individual and enterprise users }
+order: 1
+---
+
+import Figure from '../../../components/Figure.astro';
+import LoopVideo from '../../../components/LoopVideo.astro';
+import Refactor from '../../../components/diagrams/Refactor.astro';
+import store from '../../../assets/projects/fydeos/store.png';
+import drop from '../../../assets/projects/fydeos/drop.mp4';
+import dropCover from '../../../assets/projects/fydeos/drop-cover.jpg';
+import community from '../../../assets/projects/fydeos/community.png';
+
+## Background
+
+[FydeOS](https://fydeos.com) is an operating system based on [ChromiumOS](https://www.chromium.org/chromium-projects/), adapted for individual and enterprise users in China. Users need everyday apps, productivity tools, and file sharing between devices. Enterprises also need cloud services for authentication, preference sync, and device binding.
+
+<Figure
+  src={store}
+  alt="FydeOS app store home page"
+  caption="FydeOS app store"
+/>
+
+## What I did
+
+- **[App store](https://store.fydeos.com):** A mirror of Chrome apps for users in China. A crawler continuously fetches, re-signs, and repackages over 1000 web apps and browser extensions. The store supports browsing, search, and version updates. An admin panel lets the operations team maintain app details, versions, and listing status. Direct installation of Android apps was added later.
+- **[FyDrop](https://drop.fydeos.com):** Browser-based file sharing built on WebRTC. Devices on the same network can send files to each other without signing in. It is integrated into the FydeOS file manager as a built-in feature.
+- **[Community forum](https://community.fydeos.com):** A forum built on Discourse. I handled compatibility issues from upstream upgrades and developed plugins for language switching, subscription binding, and a ticketing system.
+- **Enterprise management platform:** Helped rewrite the backend from Node.js / MongoDB to Go / PostgreSQL.
+
+<div class="pair">
+  <Figure caption="FyDrop sending a file">
+    <LoopVideo src={drop} poster={dropCover.src} width={720} height={388} label="FyDrop demo: sending files between devices on the same network" />
+  </Figure>
+  <Figure src={community} half alt="Topic list on the FydeOS community forum" caption="Topic list on the FydeOS community forum" />
+</div>
+
+## Technical details
+
+**Account and sync service rebuild:** The account, sync, and enterprise admin services each had a separate public API. The rebuild moved the account and sync services from Node.js to Go. All three services use gRPC interfaces behind a single APISIX gateway. The database moved from MongoDB to PostgreSQL. A revised data model, composite indexes, and sharding reduced database query time in the sync service by 50%.
+
+<Figure caption="Account and sync services rewritten in Go, with gRPC interfaces and an APISIX gateway">
+  <Refactor />
+</Figure>
+
+**FyDrop peer-to-peer connections:** A WebSocket signaling server groups devices by public IP so devices on the same network can find each other. Files are encrypted and sent directly over RTCDataChannel in ordered chunks. The sender waits for an acknowledgment after each batch to avoid filling the buffer. STUN discovers the public IP. A TURN relay handles connections where direct access fails.

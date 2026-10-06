@@ -1,0 +1,46 @@
+---
+title: Merryking
+subtitle: E-commerce site and operations automation
+period: 2025 — Present
+role: Solo developer
+stack: [Next.js, Tailwind CSS, Node.js, OSS, CDN, Docker, Feishu]
+summary: Built an e-commerce site that links inquiries to Google Ads clicks, plus scripts to import, export, and bulk-edit Alibaba.com products and improve product images.
+metrics:
+  - { value: "158", label: Product listings generated }
+  - { value: "98", label: Core Web Vitals performance score }
+  - { value: "1301", label: Products exported from Alibaba.com }
+  - { value: "720", label: Main images optimized with AI }
+order: 3
+---
+
+import Figure from '../../../components/Figure.astro';
+import Flow from '../../../components/diagrams/Flow.astro';
+
+## Background
+
+[Merryking](https://www.merryking.com) makes power adapters and chargers, mainly for overseas customers. Its website ran on a SaaS site builder, which controlled the content and data. Routine work was manual: forwarding inquiries, answering repeated questions from factory job applicants, and migrating over a thousand Alibaba.com products.
+
+## What I did
+
+- **Website:** Rewrote the website in Next.js. Specs and details for 158 products were extracted from the old site and PDF manuals. Images are stored on Alibaba Cloud OSS, served worldwide through a CDN. GitHub Actions builds the Docker image. The server pulls it, and Caddy acts as the reverse proxy and issues certificates automatically.
+- **Operations dashboard:** The dashboard shows inquiries and contact-link clicks. The team can see each lead's ad parameters and IP location, and a Feishu bot sends new inquiries to a group chat.
+- **Alibaba.com toolchain:** Tampermonkey and local Node.js scripts exported 1301 products and 31713 images. They also generated Excel listing templates for direct import, with titles, specs, prices, and selling points filled in bulk. An OpenAI image generation model restyled 720 main images.
+
+## Technical details
+
+**Google Ads conversions and attribution:** Google Ads counted contact-link clicks, such as clicks on the email address, as primary conversions. Bidding therefore optimized for contact intent rather than actual inquiries. I planned a workflow to link ad clicks to inquiries, let sales staff qualify them, and send qualified inquiries back to Google Ads to guide bidding.
+
+<Figure caption="Google Ads conversion workflow">
+  <Flow
+    label="Conversion workflow: ad visit, contact, log inquiry, qualify, send to Google Ads"
+    steps={[
+      { title: 'Ad visit', note: 'Store the ad click ID and UTM parameters' },
+      { title: 'Contact', note: 'Submit a form or email with a contact code' },
+      { title: 'Log inquiry', note: 'Match it to the ad source by contact code' },
+      { title: 'Qualify', note: 'Sales staff assess the inquiry' },
+      { title: 'Send to Google Ads', note: 'Upload qualified inquiries through Data Manager', accent: true },
+    ]}
+  />
+</Figure>
+
+**On-demand image optimization:** A custom loader for Next.js `<Image>` uses OSS parameters to resize images and convert them to WebP. The CDN caches each size by its parameters. The Core Web Vitals performance score is 98.

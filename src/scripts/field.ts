@@ -1,6 +1,6 @@
-// 首屏"理一理"方块，从样稿移植，算法与常量保持不变。
+// 首屏"理一理"方块。每次打开页面随机取种子，初始排布每次不同。
 // 每个黄块在同一张隐藏网格上有固定地址；指针经过时附近的黄块归位、灰块让到外圈，
-// 停止操作 1.5 秒后慢慢打散。
+// 全部归位时斜扫一道光，停止操作 2.4 秒后慢慢打散。
 
 interface Piece {
   yellow: boolean;
@@ -40,7 +40,13 @@ interface Pulse {
 
 type Vec = [number, number];
 
-const IDLE_BEFORE_DISPERSE = 1.5;
+const IDLE_BEFORE_DISPERSE = 2.4;
+// 黄块归位动画 0.95 秒，缓动到 0.7 秒时离终点已不到 1 像素，看上去已经停稳，闪光从这时开始。
+const LOOKS_SETTLED = 0.7;
+// 停手 2.4 秒才打散，最后一块停稳后至少还有约 1.3 秒，闪光能完整扫完；万一被打散就直接收掉。
+const SHINE_DURATION = 0.75;
+// 光带半宽，按 x + y 计，单位是网格。
+const SHINE_WIDTH = 1.6;
 
 const ease = (t: number) => 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 4);
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -57,6 +63,8 @@ export function initField(root: HTMLElement): void {
   const parts = queryParts(root);
   if (!parts) return;
   const { canvas, ctx, status } = parts;
+  // 播报文案按页面语言写在 Hero.astro 的 data-msg-* 上
+  const messages = status.dataset;
 
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
   let paused = preference.matches;
@@ -69,10 +77,12 @@ export function initField(root: HTMLElement): void {
   let time = 0;
   let points: Piece[] = [];
   let pulses: Pulse[] = [];
-  let seed = 1907;
+  // 每次打开页面随机取种子，之后的随机数都由它推出
+  let seed = (Math.random() * 2 ** 32) >>> 0;
   let lastInput = 0;
   let dispersing = false;
   let disperseStart = 0;
+  let shineStart = -Infinity;
 
   function random() {
     seed = (seed * 1664525 + 1013904223) >>> 0;
@@ -94,6 +104,7 @@ export function initField(root: HTMLElement): void {
     seed += 37;
     points = [];
     pulses = [];
+    shineStart = -Infinity;
     dispersing = false;
     lastInput = time;
     const targets: Vec[] = [];
@@ -132,11 +143,8 @@ export function initField(root: HTMLElement): void {
       const yellow = i < targets.length;
       const [x, y] = slots[i];
       const angle = (random() - 0.5) * 1.45;
-      // 灰块最终让到黄色方阵外圈。random() 的调用顺序与样稿一致，保证同一种子排布相同。
-      const edge = (i - targets.length) % 4;
-      const offset = (random() - 0.5) * 10.4;
-      const rim = 5.05 + random() * 0.85;
-      const [tx, ty] = yellow ? (assigned.get(i) as Vec) : rimTarget(edge, offset, rim);
+      // 灰块的外圈位置等到被推开时在 lock() 里再抽，这里先填自身位置
+      const [tx, ty]: Vec = yellow ? (assigned.get(i) as Vec) : [x, y];
       const phase = random() * 6.28;
       const size = yellow ? 0.78 : 0.5 + random() * 0.23;
       points.push({
@@ -165,7 +173,7 @@ export function initField(root: HTMLElement): void {
         color: yellow ? '#ffe14d' : i % 3 === 0 ? '#454a43' : '#bfc3b9',
       });
     }
-    status.textContent = '已重新打散。移动鼠标或点击，整理附近的黄色方块。';
+    status.textContent = messages.msgScattered ?? '';
     render(0);
     start();
   }
@@ -221,6 +229,7 @@ export function initField(root: HTMLElement): void {
     dispersing = true;
     disperseStart = time;
     pulses = [];
+    shineStart = -Infinity;
     for (const p of points) {
       p.sx = p.x;
       p.sy = p.y;
@@ -260,7 +269,11 @@ export function initField(root: HTMLElement): void {
     if (!paused) pulses.push({ x, y, start: time });
     if (pulses.length > 5) pulses.shift();
     const remaining = points.some((p) => p.yellow && !p.locked);
-    status.textContent = remaining ? '这一片已经理清楚了。可以继续整理其他位置。' : '黄色方块已全部整理完成。';
+    status.textContent = (remaining ? messages.msgPartial : messages.msgDone) ?? '';
+    // 最后一个黄块刚锁定，等最晚出发的那块停稳再闪光。
+    if (!remaining && !paused) {
+      shineStart = Math.max(...points.filter((p) => p.yellow).map((p) => p.start)) + LOOKS_SETTLED;
+    }
     render(0);
     start();
   }
@@ -284,6 +297,10 @@ export function initField(root: HTMLElement): void {
         ctx.fill();
       }
     }
+    // 闪光期间收集黄块轮廓，光带只画在黄块上。光带中心按 x + y 计，从方阵左上角外侧推到右下角外侧。
+    const shine = (time - shineStart) / SHINE_DURATION;
+    const glint = shine >= 0 && shine < 1 ? new Path2D() : null;
+    const band = glint ? mix(-9 - SHINE_WIDTH, 9 + SHINE_WIDTH, (1 - Math.cos(Math.PI * shine)) / 2) : 0;
     // 先画灰块，逐渐成形的黄色结构始终在上层。
     for (const p of [...points.filter((q) => !q.yellow), ...points.filter((q) => q.yellow)]) {
       if (dispersing && !paused) {
@@ -310,7 +327,12 @@ export function initField(root: HTMLElement): void {
         p.y = p.sy + Math.cos(time * 0.42 + p.phase) * 0.085;
       }
       const [x, y] = project(p.x, p.y);
-      const size = p.size * spacing;
+      let size = p.size * spacing;
+      if (glint && p.yellow) {
+        // 光带经过时微微鼓起。闪光时黄块都已摆正，轮廓不用旋转。
+        size *= 1 + 0.07 * Math.max(0, 1 - Math.abs(p.x + p.y - band) / SHINE_WIDTH);
+        glint.roundRect(x - size / 2, y - size / 2, size, size, size * 0.15);
+      }
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(p.angle);
@@ -322,6 +344,16 @@ export function initField(root: HTMLElement): void {
       ctx.roundRect(-size / 2, -size / 2, size, size, size * 0.15);
       ctx.fill();
       ctx.restore();
+    }
+    if (glint) {
+      const [ax, ay] = project((band - SHINE_WIDTH) / 2, (band - SHINE_WIDTH) / 2);
+      const [bx, by] = project((band + SHINE_WIDTH) / 2, (band + SHINE_WIDTH) / 2);
+      const light = ctx.createLinearGradient(ax, ay, bx, by);
+      light.addColorStop(0, 'rgba(255,255,255,0)');
+      light.addColorStop(0.5, 'rgba(255,255,255,0.72)');
+      light.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = light;
+      ctx.fill(glint);
     }
     if (dispersing && time - disperseStart >= 1.15) {
       dispersing = false;
@@ -364,7 +396,10 @@ export function initField(root: HTMLElement): void {
   function setPaused(value: boolean) {
     paused = value;
     stop();
-    if (paused) pulses = [];
+    if (paused) {
+      pulses = [];
+      shineStart = -Infinity;
+    }
     render(0);
     start();
   }

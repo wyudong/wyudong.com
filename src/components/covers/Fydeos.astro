@@ -5,6 +5,38 @@ import fydropShot from '../../assets/projects/fydeos/fydrop.png';
 import installerUrl from '../../assets/projects/fydeos/installer.svg?url';
 import opengappsUrl from '../../assets/projects/fydeos/opengapps.svg?url';
 import rdpUrl from '../../assets/projects/fydeos/rdp.svg?url';
+import { langOf } from '../../i18n';
+
+const t = {
+  zh: {
+    installer: '安装程序',
+    gapps: '配置 Open GApps',
+    rdp: '远程桌面',
+    community: '社区概念示意：新闻公告、求助答疑、分享发现三个版块',
+    forum: 'FydeOS 社区',
+    nav: '最新 · 热门',
+    boards: [
+      ['新闻公告', '公告与最新动态'],
+      ['求助答疑', '安装、驱动与兼容性'],
+      ['分享发现', '配置、玩法与折腾'],
+    ],
+    fydrop: 'FyDrop 跨设备文件传输真实界面',
+  },
+  en: {
+    installer: 'Installer',
+    gapps: 'Configure GApps',
+    rdp: 'Remote Desktop',
+    community: 'Community preview: Announcements, Support, and Discussion',
+    forum: 'FydeOS Community',
+    nav: 'Latest · Top',
+    boards: [
+      ['Announcements', 'Announcements and updates'],
+      ['Support', 'Installation, drivers, and compatibility'],
+      ['Discussion', 'Setups, tips, and experiments'],
+    ],
+    fydrop: 'FyDrop file sharing interface',
+  },
+}[langOf(Astro)];
 ---
 
 <div class="project-cover cover-fy">
@@ -14,48 +46,48 @@ import rdpUrl from '../../assets/projects/fydeos/rdp.svg?url';
         <div class="app-stack">
           <div class="app-cover">
             <img src={installerUrl} alt="" loading="lazy" decoding="async" />
-            <span class="app-name">安装程序</span>
+            <span class="app-name">{t.installer}</span>
           </div>
           <div class="app-cover">
             <img src={opengappsUrl} alt="" loading="lazy" decoding="async" />
-            <span class="app-name">配置 Open GApps</span>
+            <span class="app-name">{t.gapps}</span>
           </div>
           <div class="app-cover app-cover-wide">
             <img src={rdpUrl} alt="" loading="lazy" decoding="async" />
-            <span class="app-name">远程桌面</span>
+            <span class="app-name">{t.rdp}</span>
           </div>
         </div>
       </BrowserMock>
     </div>
     <div class="fy-window fy-community">
       <BrowserMock title="Community">
-        <div class="community-art" role="img" aria-label="社区概念示意：新闻公告、求助答疑、分享发现三个版块">
+        <div class="community-art" role="img" aria-label={t.community}>
           <div class="forum-bar">
-            <span class="forum-name">FydeOS 社区</span>
-            <span class="forum-nav">最新 · 热门</span>
+            <span class="forum-name">{t.forum}</span>
+            <span class="forum-nav">{t.nav}</span>
           </div>
           <div class="boards">
             <div class="board">
               <i class="board-icon board-icon-1"></i>
               <span class="board-text">
-                <strong>新闻公告</strong>
-                <em>公告与最新动态</em>
+                <strong>{t.boards[0][0]}</strong>
+                <em>{t.boards[0][1]}</em>
               </span>
               <span class="board-go">›</span>
             </div>
             <div class="board">
               <i class="board-icon board-icon-2"></i>
               <span class="board-text">
-                <strong>求助答疑</strong>
-                <em>安装、驱动与兼容性</em>
+                <strong>{t.boards[1][0]}</strong>
+                <em>{t.boards[1][1]}</em>
               </span>
               <span class="board-go">›</span>
             </div>
             <div class="board">
               <i class="board-icon board-icon-3"></i>
               <span class="board-text">
-                <strong>分享发现</strong>
-                <em>配置、玩法与折腾</em>
+                <strong>{t.boards[2][0]}</strong>
+                <em>{t.boards[2][1]}</em>
               </span>
               <span class="board-go">›</span>
             </div>
@@ -71,7 +103,7 @@ import rdpUrl from '../../assets/projects/fydeos/rdp.svg?url';
             widths={[280, 560, 800]}
             sizes="(min-width: 810px) 280px, 34vw"
             loading="lazy"
-            alt="FyDrop 跨设备文件传输真实界面"
+            alt={t.fydrop}
           />
         </div>
       </BrowserMock>
@@ -274,7 +306,7 @@ import rdpUrl from '../../assets/projects/fydeos/rdp.svg?url';
     object-fit: contain;
   }
 
-  /* 714 版心和手机上封面变小，窗口里的字跟着缩（样稿手机端的数值） */
+  /* 714 版心和手机上封面变小，窗口里的字跟着缩 */
   /* 窗口变小之后，收起版块说明，只留标题 */
   @media (width < 1200px) {
     .community-art {

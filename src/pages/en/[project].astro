@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import ProjectPage from '../../components/ProjectPage.astro';
+import { projectPaths } from '../../projects';
+
+// 英文详情页：/en/fydeos/ 等，内容在 src/content/projects/en/*.mdx
+export const getStaticPaths = (() => projectPaths('en')) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { entry, next }: Props = Astro.props;
+---
+
+<ProjectPage entry={entry} next={next} />

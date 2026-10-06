@@ -216,5 +216,5 @@ console.log(
     (latin.missing.length ? `（缺 ${String.fromCodePoint(...latin.missing)}，由 Noto Sans SC 显示）` : '') +
     `；Plus Jakarta Sans Italic ${kb(italic.bytes)}` +
     `；Noto Sans SC ${kb(cjk.bytes)}` +
-    (missing.length ? `；两套字体都没有、会回落系统字体的字符：${String.fromCodePoint(...missing)}` : ''),
+    (missing.length ? `；字体缺少，回落系统字体的字符：${String.fromCodePoint(...missing)}` : ''),
 );

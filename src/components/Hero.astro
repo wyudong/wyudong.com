@@ -3,7 +3,9 @@ import { langOf } from '../i18n';
 
 const t = {
   zh: {
-    title: ['紙上得來終覺淺，'],
+    // 两句随滚动换，见下面的 .scroll
+    title: ['紙上得來終覺淺，', '絕知此事要躬行。'],
+    titleMode: 'scroll',
     description:
       '最擅长 Web 全栈，也做桌面端和移动端，还为企业搭建自动化流程。喜欢先弄明白问题，再把它做成好用的产品。',
     cta: '看看我的作品',
@@ -16,6 +18,7 @@ const t = {
   en: {
     // 三句轮播，见下面的 .rotate
     title: ['I hear, I know.', 'I see, I remember.', 'I do, I understand.'],
+    titleMode: 'rotate',
     description:
       'I specialize in full-stack web development, with experience in desktop and mobile apps and business automation. My approach is to understand the problem first, then build a product that is easy to use.',
     cta: 'See my work',
@@ -30,7 +33,7 @@ const t = {
 
 <section class="hero" aria-labelledby="hero-title">
   <div class="copy">
-    <h1 id="hero-title" class:list={{ rotate: t.title.length > 1 }}>
+    <h1 id="hero-title" class={t.titleMode} data-scroll-title={t.titleMode === 'scroll' ? '' : undefined}>
       {t.title.map((line, i) => (
         <span class="line" style={`--i: ${i}`}>
           {line}
@@ -70,8 +73,10 @@ const t = {
 
 <script>
   import { initField } from '../scripts/field';
+  import { initScrollTitle } from '../scripts/scroll-title';
 
   document.querySelectorAll<HTMLElement>('[data-field]').forEach(initField);
+  document.querySelectorAll<HTMLElement>('[data-scroll-title]').forEach(initScrollTitle);
 </script>
 
 <style>
@@ -133,6 +138,27 @@ const t = {
     100% {
       opacity: 0;
     }
+  }
+  /*
+   * 中文标题两句随滚动换：两句叠在同一格里，src/scripts/scroll-title.ts 按滚动写进度 --p（0–1）。
+   * 只变透明度：第一句在 0–0.5 之间淡出，第二句在 0.5–1 之间淡入，两句不交叠。
+   * 没有脚本时 --p 停在 0，只显示第一句。读屏软件两句都读。
+   */
+  .scroll {
+    --p: 0;
+    display: grid;
+  }
+  .scroll .line {
+    grid-area: 1 / 1;
+    will-change: opacity;
+  }
+  .scroll .line:nth-child(1) {
+    --t: clamp(0, var(--p) / 0.5, 1);
+    opacity: calc(1 - var(--t));
+  }
+  .scroll .line:nth-child(2) {
+    --t: clamp(0, (var(--p) - 0.5) / 0.5, 1);
+    opacity: var(--t);
   }
   .description {
     font-size: 16px;
@@ -280,6 +306,13 @@ const t = {
     }
     .rotate .line {
       animation: none;
+    }
+    /* 打印时两句上下排开 */
+    .scroll {
+      display: block;
+    }
+    .scroll .line {
+      opacity: 1 !important;
     }
     .hero {
       display: block;

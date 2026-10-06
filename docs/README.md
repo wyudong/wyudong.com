@@ -23,7 +23,7 @@ Astro 7 静态站，中英双语，不用 UI 框架。本文是站点唯一的�
 - 客户端脚本不写文案：`field.ts` 的播报从 `data-msg-*` 读，`hub-flow.ts` 的按钮名称从 `data-label-*` 读，文案由组件按语言写进去。
 - `src/projects.ts`：`projectsFor(lang)` 按语言取项目并按 `order` 排序，`slugOf` 去掉 `en/` 前缀，`projectPaths(lang)` 是两种语言 `getStaticPaths` 共用的。详情页主体在 `components/ProjectPage.astro`。
 - `<head>` 里两种语言互相写 `hreflang` alternate，`x-default` 指向中文；`og:locale` 和 `og:locale:alternate` 跟着语言走。
-- 英文文案的写法跟中文一致：短句、不用营销形容词、数字前置、数字不加千分位、中达源不提客户行业。中文量词单位在英文里并进 label（`158` + Product listings generated），MB 保留为单位。英文首页标题是三句轮播，见“首屏”。
+- 英文文案的写法跟中文一致：短句、不用营销形容词、数字前置、数字不加千分位、中达源不提客户行业。中文量词单位在英文里并进 label（`158` + Product listings generated），MB 保留为单位。英文首页标题是三句轮播，中文首页标题是两句随滚动切换，见“首屏”。
 - 列表项开头的加粗小标题：英文冒号一起加粗（`**Label:**`，带链接的写 `**[Label](url):**`，冒号不进链接），中文冒号不加粗（`**标签**：`）。
 
 ## 命令
@@ -55,7 +55,7 @@ site/
     ├── pages/              # index.astro、[project].astro；en/ 下是英文的同名两页
     ├── layouts/Base.astro  # head、顶栏、<main class="shell">、页脚
     ├── styles/             # global.css（token、版心）、article.css（正文）、fonts.generated.css（生成物）
-    ├── scripts/            # field.ts（首屏方块）、hub-flow.ts（Merryking 动画）
+    ├── scripts/            # field.ts（首屏方块）、scroll-title.ts（中文首页标题换句）、hub-flow.ts（Merryking 动画）
     ├── components/
     │   ├── SiteHeader · Footer · Hero · ProjectMosaic · BrowserMock
     │   ├── covers/         # Fydeos · Zhongdayuan · Merryking · Soundlinks，首页卡片封面
@@ -107,10 +107,12 @@ site/
 - 右边按钮 `打个招呼👋`（英文 `Say hi👋`），链到 `mailto:hi@wyudong.com`，hover 变黄、👋 摆两下（开启减弱动效时不摆），手机端隐藏 emoji。👋 两套字体里都没有，用系统 emoji 字体显示。
 - 打招呼按钮左边是语言切换：中文页显示 `English`，英文页显示 `中文`，链到另一种语言的同一页，带 `hreflang` 和 `lang`。无边框（透明边框占位，和旁边按钮一样高），hover 变黄，手机端 13px，打印时和打招呼按钮一起隐藏。
 
-**首屏** `Hero` + `scripts/field.ts`
+**首屏** `Hero` + `scripts/field.ts` + `scripts/scroll-title.ts`
 - 左：h1、描述、按钮 `看看我的作品`（链到 `#projects`，不带箭头）。右：方块 canvas，右下角一行提示 `试着动一动`，手机端居中。没有问候行。
 - h1 字号跟版心跳档：60 / 52 / 42px，手机 `clamp(30px, 7.8vw, 54px)`。
-- 英文首页的 h1 是三句轮播：`I hear, I know.` → `I see, I remember.` → `I do, I understand.`，用斜体 Plus Jakarta Sans Italic。纯 CSS 动画：三句叠在同一个网格格子里（高度取最高的一句，切换时下面不跳），一轮 10 秒，一句占 10/3 秒：淡入 1 秒、完整显示 1.3 秒、淡出 1 秒，关键帧是整数 10% / 23% / 33%，句与句之间留 0.03 秒空白。关键帧按三句写死，改句数要一起改。打开页面时第一句已经完整显示；开启减弱动效后只显示第一句。读屏软件按顺序读出三句。中文首页标题不轮播。
+- 英文首页的 h1 是三句轮播：`I hear, I know.` → `I see, I remember.` → `I do, I understand.`，用斜体 Plus Jakarta Sans Italic。纯 CSS 动画：三句叠在同一个网格格子里（高度取最高的一句，切换时下面不跳），一轮 10 秒，一句占 10/3 秒：淡入 1 秒、完整显示 1.3 秒、淡出 1 秒，关键帧是整数 10% / 23% / 33%，句与句之间留 0.03 秒空白。关键帧按三句写死，改句数要一起改。打开页面时第一句已经完整显示；开启减弱动效后只显示第一句。读屏软件按顺序读出三句。
+- 中文首页的 h1 是两句随滚动切换：`紙上得來終覺淺，` → `絕知此事要躬行。`。两句叠在同一个网格格子里，`scroll-title.ts` 按滚动位置算出进度 `--p`（0–1）写到 h1 上，样式只改透明度：第一句在 0–0.5 淡出，第二句在 0.5–1 淡入，两句不交叠。从页面顶部开始算，滚到标题距窗口上沿约 12% 视口高时换完，滚动距离限制在 120–320px。往回滚倒过来。
+- 进度不直接跟着滚动条，而是每帧按时间常数 0.18 秒向目标靠拢（类似 GSAP ScrollTrigger 的 scrub），滚轮一格一格跳时也平滑；停在页面中间刷新时直接显示对应状态。开启减弱动效时不做平滑，进度直接跟滚动。没有脚本时只显示第一句；打印时两句上下排开；读屏软件两句都读。中英两套标题用 `titleMode`（`scroll` / `rotate`）区分。
 - 方块：每次打开页面随机取种子，初始排布每次不同；黄块 9×9、灰块让到外圈、整理半径 2.35。鼠标经过或点击会整理附近的黄块，停止操作 2.4 秒后约 1 秒打散，各块回到本次最初散落的位置附近；Enter / 空格整理下一片。
 - 全部归位后，等最后一块停稳（开始归位后 0.7 秒），一道白光从左上斜扫到右下，0.75 秒扫完，经过的黄块微微鼓起；光只画在黄块上。停手 2.4 秒才打散，闪光总能扫完。
 - 动画一直运行，只在页面不可见或滚出视口时暂停。开启减弱动效后直接归位，不闪光。缩放窗口不重置状态；aria-live 播报；noscript 显示静态图。没有暂停和重新打散按钮。
